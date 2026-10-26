@@ -48,3 +48,6 @@ html,body{width:100%;height:100%;overflow:hidden}
 @keyframes laser-fade{from{opacity:.5}to{opacity:0;transform:translate(-50%,-50%) scale(.3)}}
 @media(prefers-reduced-motion:reduce){.laser-trail{display:none}}
 @media print{.laser-trail{display:none!important}}
+
+/* Computer Modern gives the presentation its familiar LaTeX typography. */
+body,button,.slide,.slide h1,.slide h2,.slide h3,.slide p,.slide span,.slide strong,.slide b,.slide li,.slide th,.slide td,.formula,.constraints p,.constraints span,.explanation .formula,.labels span,.tokens b,.index,.key-formula>span,.quota-calculation,.big-stat,.big-stat span,.rho strong,.network-name,.conclusions li>span,.closing-bottom strong{font-family:"Computer Modern Serif","Latin Modern Roman","Times New Roman",serif}
