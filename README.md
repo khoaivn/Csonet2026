@@ -1,6 +1,6 @@
 # CSONET presentation
 
-12 slides in English, written in HTML, CSS and JavaScript. No framework, build step, CDN, or external font is required. The deck works offline.
+12 slides in English, written in HTML, CSS and JavaScript. No framework or build step is required. Computer Modern is loaded from a font CDN; fallback fonts are available offline. Optional Internet remote control uses Firebase Realtime Database.
 
 ## Open locally
 
@@ -50,4 +50,8 @@ Source: *Streaming Algorithms for Monotone k-Submodular Maximization under Fairn
 - The comparison uses the common epsilon range stated in the paper. For k = 3 and epsilon = 0.1, the MPFSA guarantee is 0.3.
 - The paper's experiment artifact: https://github.com/tantdhvan/OP-MPFSA
 
-No PDF manuscript is bundled, and no analytics, remote scripts, or tracking are included.
+No PDF manuscript or analytics is bundled. A font stylesheet is loaded from a CDN; optional remote control connects to the Firebase database configured by the presenter.
+
+## iPhone remote control
+
+See [REMOTE-SETUP.md](REMOTE-SETUP.md) for Firebase setup and Internet control. Open the phone icon on the presentation toolbar to create a room, then open its private link on iPhone.
