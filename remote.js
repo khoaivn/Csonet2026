@@ -1,9 +1,67 @@
 'use strict';
 (() => {
+ if(new URLSearchParams(location.search).has('preview'))return;
  const $ = id => document.getElementById(id);
  const controller = document.body.dataset.remote === 'controller';
  let database='', room='', timer, session=null, busy=false, applied='', disposed=false;
  let writeQueue=Promise.resolve();
+ let annotationStream=null,previewSlide=-1,connected=false;
+ let tool='swipe',gesture=null,stroke=null,laser=null;
+ const phoneInk=new Map();
+ let annotationPending=null,annotationSending=false,annotationTimer;
+ function preview(){return $('remotePreview')?.contentWindow?.deckRemote;}
+ function currentAnnotation(){const index=session?.state?.slide??0;return {slide:index,ink:JSON.stringify(phoneInk.get(index)||[]),laser:!!laser,x:laser?.x||0,y:laser?.y||0,at:Date.now()};}
+ function queueAnnotation(){
+  if(!connected)return;
+  annotationPending=currentAnnotation();preview()?.annotation(annotationPending);
+  if(!annotationTimer&&!annotationSending)annotationTimer=setTimeout(flushAnnotation,80);
+ }
+ async function flushAnnotation(){
+  annotationTimer=null;if(annotationSending||!annotationPending)return;
+  const value=annotationPending;annotationPending=null;annotationSending=true;
+  try{await request('/annotation','PUT',value);}catch(error){status('Không gửi được Laser/Pen. Kiểm tra mạng và Publish Rules mới.');}
+  finally{annotationSending=false;if(annotationPending)annotationTimer=setTimeout(flushAnnotation,80);}
+ }
+ function startAnnotationStream(){
+  annotationStream?.close();
+  annotationStream=new EventSource(`${database}/slideRooms/${room}/annotation.json`);
+  annotationStream.addEventListener('put',event=>{
+   try{const value=JSON.parse(event.data);if(value.path==='/'&&value.data)window.deckRemote.annotation(value.data);}catch{status('Không đọc được dữ liệu Laser/Pen.');}
+  });
+  for(const name of ['cancel','auth_revoked'])annotationStream.addEventListener(name,()=>{annotationStream.close();status('Kết nối Laser/Pen đã đóng. Kiểm tra Rules hoặc tạo phòng mới.');});
+ }
+ function setTool(value){
+  tool=value;gesture=null;stroke=null;laser=null;
+  document.querySelectorAll('[data-tool]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.tool===value)));
+  $('remoteGestureHint').textContent=value==='swipe'?'Vuốt trái: tiếp · Vuốt phải: trước':value==='laser'?'Chạm và kéo để chỉ laser':'Chạm và kéo để vẽ · Chọn biểu tượng bàn tay để vuốt slide';
+  queueAnnotation();
+ }
+ function setupTools(){
+  const surface=$('remoteSurface');
+  const point=event=>{const b=surface.getBoundingClientRect();return {x:Math.max(0,Math.min(1280,(event.clientX-b.left)/b.width*1280)),y:Math.max(0,Math.min(720,(event.clientY-b.top)/b.height*720))};};
+  document.querySelectorAll('[data-tool]').forEach(button=>button.onclick=()=>setTool(button.dataset.tool));
+  $('remoteClear').onclick=()=>{if(!connected)return;phoneInk.delete(session.state.slide);laser=null;queueAnnotation();};
+  surface.addEventListener('pointerdown',event=>{
+   if(!connected||busy||gesture||event.button!==0)return;
+   event.preventDefault();surface.setPointerCapture(event.pointerId);gesture={x:event.clientX,y:event.clientY,id:event.pointerId,slide:session.state.slide};
+   if(tool==='pen'){const strokes=phoneInk.get(gesture.slide)||[];if(strokes.reduce((n,s)=>n+s.length,0)>=4000){gesture=null;status('Nét vẽ đã đầy. Xóa nét trước khi vẽ tiếp.');return;}stroke=[point(event)];strokes.push(stroke);phoneInk.set(gesture.slide,strokes);queueAnnotation();}
+   if(tool==='laser'){laser=point(event);queueAnnotation();}
+  });
+  surface.addEventListener('pointermove',event=>{
+   if(!gesture||gesture.id!==event.pointerId)return;
+   if(tool==='laser'){laser=point(event);queueAnnotation();}
+   if(tool==='pen'&&stroke){const strokes=phoneInk.get(gesture.slide)||[];if(strokes.reduce((n,s)=>n+s.length,0)>=4000){status('Nét vẽ đã đầy. Xóa nét trước khi vẽ tiếp.');return;}stroke.push(point(event));queueAnnotation();}
+  });
+  function finish(event){
+   if(!gesture||gesture.id!==event.pointerId)return;
+   const previous=gesture;gesture=null;stroke=null;
+   if(tool==='swipe'&&event.type==='pointerup'){const dx=event.clientX-previous.x,dy=event.clientY-previous.y;if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy)*1.3)sendSlide(previous.slide+(dx<0?1:-1));}
+   else{laser=null;queueAnnotation();}
+  }
+  for(const event of ['pointerup','pointercancel','lostpointercapture'])surface.addEventListener(event,finish);
+  document.addEventListener('visibilitychange',()=>{if(document.hidden){gesture=null;stroke=null;laser=null;queueAnnotation();}});
+  setTool('swipe');
+ }
  const status = message => { $('remoteStatus').textContent=message; };
  function validateDatabase(value) {
   const url=new URL(value.trim());
@@ -23,6 +81,7 @@
    $('remotePrevious').disabled=busy||state.slide===0;
    $('remoteNext').disabled=busy||state.slide===session.total-1;
    $('remoteSlide').value=String(state.slide);
+   if(previewSlide!==state.slide){gesture=null;stroke=null;laser=null;previewSlide=state.slide;preview()?.go(state.slide);preview()?.annotation(currentAnnotation());}
    const slide=window.remoteSlides?.[state.slide];
    $('remoteTitle').textContent=slide?.dataset.title||'';
    $('remoteNotes').textContent=slide?.querySelector('.speaker-notes')?.textContent||'';
@@ -42,7 +101,7 @@
    session=value;
    if(controller) {
     if(busy && value.state?.ack===applied)busy=false;
-    const live=Date.now()-(value.state?.heartbeat||0)<15000;
+    const live=Date.now()-(value.state?.heartbeat||0)<15000;connected=live;
     buttons(!live||busy);showState(value.state);
     status(live?(busy?'Đang chuyển slide…':'Đã kết nối với máy tính'):'Máy tính mất kết nối. Đang chờ kết nối lại…');
     if(!live)buttons(true);
@@ -55,7 +114,7 @@
     await publishState();
     status('Phòng đang mở · iPhone có thể kết nối');
    }
-  } catch(error){status(error.message);if(controller)buttons(true);}
+  } catch(error){status(error.message);if(controller){connected=false;buttons(true);}}
   if(!disposed)timer=setTimeout(poll,1000);
  }
  async function startHost() {
@@ -69,7 +128,7 @@
    await request('','PUT',session);
    const link=new URL('remote.html',location.href);link.hash=new URLSearchParams({db:database,room}).toString();
    $('remoteLink').value=link.href;$('remoteConnection').hidden=false;$('remoteSetup').hidden=true;
-   disposed=false;poll();
+   disposed=false;startAnnotationStream();poll();
   } catch(error){status(error.message);}finally{$('remoteStart').disabled=false;}
  }
  async function sendSlide(slide) {
@@ -89,6 +148,8 @@
     $('remotePrevious').onclick=()=>sendSlide(session.state.slide-1);
     $('remoteNext').onclick=()=>sendSlide(session.state.slide+1);
     $('remoteSlide').onchange=event=>sendSlide(Number(event.target.value));
+    setupTools();
+    $('remotePreview').addEventListener('load',()=>{if(session){preview()?.go(session.state.slide);preview()?.annotation(currentAnnotation());}});
     poll();
    }catch(error){status(error.message);}
   })();
@@ -99,7 +160,7 @@
   $('remoteStart').onclick=startHost;
   $('remoteCopy').onclick=async()=>{try{await navigator.clipboard.writeText($('remoteLink').value);status('Đã sao chép liên kết. Gửi và mở bằng Safari trên iPhone.');}catch{$('remoteLink').select();status('Hãy sao chép liên kết trong ô phía trên.');}};
   $('remoteStop').onclick=async()=>{
-   disposed=true;clearTimeout(timer);await writeQueue.catch(()=>{});
+   disposed=true;annotationStream?.close();clearTimeout(timer);await writeQueue.catch(()=>{});
    try{await request('','DELETE');status('Đã đóng phòng.');}catch(error){status(error.message);}
    session=null;room='';$('remoteSetup').hidden=false;$('remoteConnection').hidden=true;
   };

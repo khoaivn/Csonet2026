@@ -42,6 +42,30 @@
         },
         "$other": {
           ".validate": false
+        },
+        "annotation": {
+          ".validate": "newData.hasChildren(['slide','ink','laser','x','y','at'])",
+          "slide": {
+            ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 0 && newData.val() < newData.parent().parent().child('total').val()"
+          },
+          "ink": {
+            ".validate": "newData.isString() && newData.val().length <= 300000"
+          },
+          "laser": {
+            ".validate": "newData.isBoolean()"
+          },
+          "x": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1280"
+          },
+          "y": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 720"
+          },
+          "at": {
+            ".validate": "newData.isNumber()"
+          },
+          "$other": {
+            ".validate": false
+          }
         }
       }
     }

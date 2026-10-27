@@ -51,3 +51,6 @@ html,body{width:100%;height:100%;overflow:hidden}
 
 /* Computer Modern gives the presentation its familiar LaTeX typography. */
 body,button,.slide,.slide h1,.slide h2,.slide h3,.slide p,.slide span,.slide strong,.slide b,.slide li,.slide th,.slide td,.formula,.constraints p,.constraints span,.explanation .formula,.labels span,.tokens b,.index,.key-formula>span,.quota-calculation,.big-stat,.big-stat span,.rho strong,.network-name,.conclusions li>span,.closing-bottom strong{font-family:"Computer Modern Serif","Latin Modern Roman","Times New Roman",serif}
+
+html:has(body.preview) .toolbar,body.preview .progress{display:none!important}
+body.preview #deck{height:100dvh}

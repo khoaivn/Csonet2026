@@ -24,8 +24,11 @@ Website tiếp tục chạy trên GitHub Pages. Firebase Realtime Database truy�
 - Đồng bộ bằng REST mỗi giây; thao tác có thể mất khoảng 1–2 giây hoặc lâu hơn tùy đường truyền. Giao diện chỉ nhận lệnh tiếp theo sau khi máy tính xác nhận để tránh mất thứ tự.
 - Phòng dùng liên kết ngẫu nhiên 128 bit. Ai có liên kết đều có thể điều khiển; không đăng liên kết lên nơi công khai. Danh sách phòng không thể được đọc qua Rules đã cung cấp.
 - Phòng hết quyền truy cập sau 4 giờ. Đóng phòng sẽ xóa dữ liệu phòng. Phòng hết hạn không tự xóa khỏi database; có thể xóa dữ liệu cũ thủ công trong Firebase Console.
-- Chỉ số slide, thời hạn, lệnh và dấu thời gian được gửi lên Firebase; ghi chú được tải từ website slide.
-- Không gửi laser/pen từ điện thoại. Các công cụ hiện tại vẫn dùng trên máy tính.
+- Chỉ số slide, thời hạn, lệnh, tọa độ Laser/Pen và dấu thời gian được gửi lên Firebase; nội dung slide và ghi chú được tải từ website.
+- Màn hình điện thoại có hai phần: slide và ghi chú. Để dọc: slide ở trên; xoay ngang: slide và ghi chú nằm cạnh nhau.
+- Chọn biểu tượng bàn tay để vuốt trái/phải trên slide. Chọn Laser hoặc Pen để chạm và kéo trực tiếp trên slide; nét vẽ và laser đồng bộ lên máy tính. Chọn lại bàn tay để chuyển bằng vuốt.
+- Nút xóa trên điện thoại xóa nét vẽ tạo từ điện thoại ở slide hiện tại. Nét vẽ giữ trong phiên điều khiển hiện tại; tải lại điện thoại có thể làm mất nét khi vẽ lại.
+- Sau khi cập nhật tính năng Laser/Pen, phải Publish lại file `firebase.rules.json` mới. Các phòng cũ nên đóng và tạo lại.
 - Firebase áp dụng hạn mức theo gói của project. Xem Usage trong Console nếu sử dụng thường xuyên.
 
 ## Nếu không kết nối được
@@ -39,3 +42,5 @@ Tham khảo chính thức: https://firebase.google.com/docs/reference/rest/datab
 ## Database của bản trình chiếu này
 
 `https://slides-35d62-default-rtdb.asia-southeast1.firebasedatabase.app` đã được điền sẵn làm giá trị mặc định trong `remote.js`. Vẫn cần Publish Rules trước khi tạo phòng.
+
+Laser/Pen sử dụng kết nối EventSource tới Firebase để nhận cập nhật liên tục. Bản xem trước là chính trang slide, nên cần đẩy đầy đủ các file thay đổi cùng lúc.

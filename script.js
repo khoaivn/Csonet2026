@@ -22,6 +22,8 @@ document.querySelectorAll('[data-dataset]').forEach(b=>b.onclick=()=>chart(b.dat
 // Presentation annotation tools. Coordinates are stored relative to each slide.
 const inkCanvas=$('annotationCanvas'),inkContext=inkCanvas.getContext('2d');
 const slideInk=new Map();
+const remoteSlideInk=new Map();
+let remoteLaserTimer;
 let annotationMode=null,activeStroke=null;
 function annotationBounds(){return slides[current].getBoundingClientRect();}
 function renderInk(){
@@ -31,7 +33,7 @@ function renderInk(){
  inkCanvas.width=Math.round(bounds.width*ratio);inkCanvas.height=Math.round(bounds.height*ratio);
  inkContext.setTransform(ratio*bounds.width/1280,0,0,ratio*bounds.height/720,0,0);
  inkContext.strokeStyle='#e53935';inkContext.fillStyle='#e53935';inkContext.lineWidth=3;inkContext.lineCap='round';inkContext.lineJoin='round';
- for(const stroke of slideInk.get(current)||[]){
+ for(const stroke of [...(slideInk.get(current)||[]),...(remoteSlideInk.get(current)||[])]){
   if(!stroke.length)continue;
   inkContext.beginPath();inkContext.moveTo(stroke[0].x,stroke[0].y);
   if(stroke.length===1){inkContext.arc(stroke[0].x,stroke[0].y,1.5,0,Math.PI*2);inkContext.fill();}
@@ -65,7 +67,7 @@ function moveLaser(event){
 }
 $('laserBtn').onclick=()=>setAnnotationMode('laser');
 $('penBtn').onclick=()=>setAnnotationMode('pen');
-$('clearInkBtn').onclick=()=>{slideInk.delete(current);activeStroke=null;renderInk();};
+$('clearInkBtn').onclick=()=>{slideInk.delete(current);remoteSlideInk.delete(current);activeStroke=null;renderInk();};
 inkCanvas.addEventListener('pointerdown',event=>{
  if(event.button!==0)return;
  if(annotationMode==='laser'){moveLaser(event);return;}
@@ -90,4 +92,19 @@ slides.forEach(slide=>annotationObserver.observe(slide,{attributes:true,attribut
 window.addEventListener('resize',renderInk);document.addEventListener('fullscreenchange',renderInk);
 renderInk();
 
-window.deckRemote={go,current:()=>current,total:slides.length};
+function receiveRemoteAnnotation(data){
+ if(!data || !Number.isInteger(data.slide) || data.slide<0 || data.slide>=slides.length)return;
+ try{
+  const strokes=JSON.parse(data.ink||'[]');
+  if(!Array.isArray(strokes)||strokes.length>4000)return;
+  let count=0;
+  for(const stroke of strokes){if(!Array.isArray(stroke))return;for(const p of stroke){if(++count>4000||!Number.isFinite(p.x)||!Number.isFinite(p.y)||p.x<0||p.x>1280||p.y<0||p.y>720)return;}}
+  remoteSlideInk.set(data.slide,strokes);renderInk();
+ }catch{return;}
+ clearTimeout(remoteLaserTimer);
+ if(data.slide===current&&data.laser&&Date.now()-data.at<3000&&Number.isFinite(data.x)&&Number.isFinite(data.y)){
+  const b=annotationBounds();moveLaser({clientX:b.left+data.x/1280*b.width,clientY:b.top+data.y/720*b.height});
+  remoteLaserTimer=setTimeout(()=>{$('laserPointer').hidden=true;clearLaserTrail();},700);
+ }else{$('laserPointer').hidden=true;clearLaserTrail();}
+}
+window.deckRemote={go,current:()=>current,total:slides.length,annotation:receiveRemoteAnnotation};
