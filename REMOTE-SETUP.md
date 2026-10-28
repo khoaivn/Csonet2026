@@ -52,3 +52,9 @@ Mở `https://khoaivn.github.io/Csonet2026/remote.html` trên iPhone và lưu d�
 Trên máy tính, chọn icon điện thoại → **Bật điều khiển**; cuối buổi chọn **Tắt điều khiển**. Một phiên kéo dài 4 giờ. Khi mở phiên mới trên máy tính khác, phiên máy tính cũ tự dừng để tránh điều khiển chồng nhau. Link cũ có mã phòng trong phần `#room` chỉ dùng cho phòng cũ; hãy lưu link cố định ở trên.
 
 Liên kết cố định không yêu cầu đăng nhập; bất kỳ ai có liên kết đều có thể điều khiển khi máy tính bật tính năng này.
+
+## Tự kết nối khi mở slide
+
+Không cần nhấn Bật điều khiển: mở trang slide trên máy tính là tự tạo phiên Firebase. iPhone chỉ cần mở `https://khoaivn.github.io/Csonet2026/remote.html`. Nếu chưa mở slide trên máy tính, điện thoại sẽ chờ. Bản xem trước trên iPhone không tạo phiên hoặc giành quyền máy tính.
+
+Nếu kết nối lỗi, trang máy tính hiện hộp thoại để kiểm tra Database URL và thử **Kết nối lại**. Cần giữ trang slide máy tính mở, có mạng và không ngủ. Nút **Ngắt kết nối** có thể dừng phiên thủ công. Chức năng đăng nhập riêng tư chưa được cấu hình; người có liên kết vẫn có thể điều khiển phiên đang hoạt động.

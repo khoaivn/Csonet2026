@@ -100,7 +100,7 @@
   try {
    const value=await request();
    if(!value || value.expiresAt<=Date.now()){
-    if(controller&&fixedController){connected=false;session=null;busy=false;buttons(true);status('Đang chờ máy tính bật điều khiển…');timer=setTimeout(poll,1500);return;}
+    if(controller&&fixedController){connected=false;session=null;busy=false;buttons(true);status('Đang chờ máy tính mở trang slide…');timer=setTimeout(poll,1500);return;}
     throw Error('Phòng đã đóng hoặc hết hạn. Tạo phòng mới trên máy tính.');
    }
    if(!controller&&value.sessionId!==hostSessionId){disposed=true;annotationStream?.close();session=null;$('remoteSetup').hidden=false;$('remoteConnection').hidden=true;status('Đã chuyển quyền điều khiển sang phiên máy tính mới.');return;}
@@ -122,10 +122,10 @@
     await publishState();
     status('Phòng đang mở · iPhone có thể kết nối');
    }
-  } catch(error){status(controller&&fixedController&&error.permissionDenied?'Đang chờ máy tính bật điều khiển. Nếu máy tính đã bật, kiểm tra Firebase Rules mới.':error.message);if(controller){connected=false;buttons(true);}}
+  } catch(error){status(controller&&fixedController&&error.permissionDenied?'Đang chờ máy tính mở trang slide. Nếu trang slide đang mở, kiểm tra Firebase Rules mới.':error.message);if(controller){connected=false;buttons(true);}}
   if(!disposed)timer=setTimeout(poll,1000);
  }
- async function startHost() {
+ async function startHost(automatic=false) {
   $('remoteStart').disabled=true;
   try {
    database=validateDatabase($('databaseUrl').value);
@@ -137,7 +137,7 @@
    const link=new URL('remote.html',location.href);if(database!==DEFAULT_DATABASE)link.hash=new URLSearchParams({db:database}).toString();
    $('remoteLink').value=link.href;$('remoteConnection').hidden=false;$('remoteSetup').hidden=true;
    disposed=false;startAnnotationStream();poll();
-  } catch(error){status(error.message);}finally{$('remoteStart').disabled=false;}
+  } catch(error){status(error.message);session=null;if(automatic&&!$('remoteDialog').open)$('remoteDialog').showModal();}finally{$('remoteStart').disabled=false;}
  }
  async function sendSlide(slide) {
   if(busy || !session || slide<0 || slide>=session.total)return;
@@ -165,13 +165,15 @@
   $('remoteBtn').onclick=()=>{$('remoteDialog').showModal();};
   $('remoteClose').onclick=()=>$('remoteDialog').close();
   $('databaseUrl').value=localStorage.getItem('csonetDatabase')||DEFAULT_DATABASE;
-  $('remoteStart').onclick=startHost;
+  $('remoteStart').onclick=()=>startHost();
   $('remoteCopy').onclick=async()=>{try{await navigator.clipboard.writeText($('remoteLink').value);status('Đã sao chép liên kết. Gửi và mở bằng Safari trên iPhone.');}catch{$('remoteLink').select();status('Hãy sao chép liên kết trong ô phía trên.');}};
   $('remoteStop').onclick=async()=>{
    disposed=true;annotationStream?.close();clearTimeout(timer);await writeQueue.catch(()=>{});
-   try{const active=await request();if(active?.sessionId===hostSessionId)await request('','DELETE');status('Đã tắt điều khiển. Điện thoại sẽ chờ phiên tiếp theo.');}catch(error){status(error.message);}
+   try{const active=await request();if(active?.sessionId===hostSessionId)await request('','DELETE');status('Đã ngắt kết nối. Mở lại trang slide để tự kết nối.');}catch(error){status(error.message);}
    session=null;room='';$('remoteSetup').hidden=false;$('remoteConnection').hidden=true;
   };
   document.addEventListener('slidechange',()=>{if(session&&!disposed)publishState().catch(error=>status(error.message));});
+  // Opening the presentation is sufficient; preview iframes return above.
+  startHost(true);
  }
 })();
