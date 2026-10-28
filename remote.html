@@ -1,8 +1,8 @@
 <!doctype html>
-<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="referrer" content="no-referrer"><title>CSONET · Điều khiển slide</title><link rel="stylesheet" href="remote.css?v=20261028-picker15"></head>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="referrer" content="no-referrer"><title>CSONET · Điều khiển slide</title><link rel="stylesheet" href="remote.css?v=20261028-background16"></head>
 <body data-remote="controller"><main class="remote-page">
 <div class="remote-panes"><section class="remote-slide-pane" aria-label="Slide và công cụ">
-<header class="remote-heading"><strong>CSONET</strong><span id="remoteStatus" role="status">Đang kết nối…</span></header>
+<header class="remote-heading"><strong>CSONET</strong><span id="remoteStatus" role="status">Đang kết nối…</span><button id="remoteBackground" type="button" data-remote-nav disabled aria-label="Đổi màu nền slide" aria-expanded="false" aria-controls="remoteBackgroundOptions">Nền ◐</button></header>
 <div class="remote-preview"><iframe id="remotePreview" src="NCS-csonet2026.html?preview=1" title="Slide hiện tại" tabindex="-1"></iframe><div id="remoteSurface" aria-label="Vuốt để chuyển slide hoặc chạm để dùng Laser và Pen"></div></div>
 <div class="remote-control-panel"><div class="remote-tools" role="group" aria-label="Công cụ trình chiếu">
 <button data-tool="swipe" aria-pressed="true" aria-label="Vuốt chuyển slide" title="Vuốt chuyển slide"><svg viewBox="0 0 24 24"><path d="M8 12V5a2 2 0 0 1 4 0v6-2a2 2 0 0 1 4 0v2a2 2 0 0 1 4 0v5c0 4-3 6-6 6h-2c-2 0-3-1-4-3l-4-5a2 2 0 0 1 3-2l1 1"/></svg></button>
@@ -14,4 +14,4 @@
 <label class="sr-only" for="remoteSlide">Chọn slide</label><select id="remoteSlide" hidden disabled></select><button id="remoteSlidePicker" type="button" data-remote-nav disabled aria-label="Chọn slide" aria-haspopup="listbox" aria-expanded="false" aria-controls="remoteSlideOptions">Chọn slide ▾</button></div></div>
 </section><section class="remote-notes-pane" aria-label="Ghi chú thuyết trình"><div class="remote-notes-content"><h1 id="remoteTitle">Điều khiển slide</h1><p id="remoteNotes"></p></div></section></div>
 <div id="remoteSlideOptions" role="listbox" aria-label="Chọn slide" hidden></div>
-</main><script src="remote.js?v=20261028-picker15"></script></body></html>
+<div id="remoteBackgroundOptions" role="group" aria-label="Màu nền slide" hidden><button type="button" data-background="#ffffff" style="--swatch:#ffffff">Trắng</button><button type="button" data-background="#f5f7fa" style="--swatch:#f5f7fa">Xám xanh nhạt</button><button type="button" data-background="#fbfaf6" style="--swatch:#fbfaf6">Trắng kem</button><button type="button" data-background="#eef5f1" style="--swatch:#eef5f1">Xanh nhạt</button></div></main><script src="remote.js?v=20261028-background16"></script></body></html>

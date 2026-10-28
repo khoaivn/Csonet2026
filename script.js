@@ -107,4 +107,4 @@ function receiveRemoteAnnotation(data){
   remoteLaserTimer=setTimeout(()=>{$('laserPointer').hidden=true;clearLaserTrail();},700);
  }else{$('laserPointer').hidden=true;clearLaserTrail();}
 }
-window.deckRemote={go,current:()=>current,total:slides.length,annotation:receiveRemoteAnnotation,geometry:()=>{const b=annotationBounds();return {left:b.left,top:b.top,width:b.width,height:b.height,viewportWidth:innerWidth,viewportHeight:innerHeight};}};
+window.deckRemote={background:color=>{if(/^#[0-9a-f]{6}$/i.test(color))document.documentElement.style.setProperty('--slide-background',color);},go,current:()=>current,total:slides.length,annotation:receiveRemoteAnnotation,geometry:()=>{const b=annotationBounds();return {left:b.left,top:b.top,width:b.width,height:b.height,viewportWidth:innerWidth,viewportHeight:innerHeight};}};

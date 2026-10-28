@@ -72,6 +72,9 @@
         },
         "presentation": {
           ".validate": "newData.isString() && (newData.val() === 'csonet' || newData.val() === 'chuyen-de-2')"
+        },
+        "background": {
+          ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
         }
       }
     }

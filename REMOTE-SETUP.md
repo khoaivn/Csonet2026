@@ -51,3 +51,5 @@ Trang slide và iPhone đều phải đăng nhập tài khoản chủ sở hữu
 ## Nhiều bài thuyết trình
 
 Trang gốc `index.html` là thư viện chọn bài. Bài CSONET nằm tại `NCS-csonet2026.html`, Chuyên đề 2 tại `NCS-CD2.html`. Trang thư viện không tạo phiên remote; bài đang mở trên máy tính tạo phiên với mã bài để iPhone tải đúng slide và ghi chú. Cần Publish Rules mới cho trường `presentation`.
+
+Đổi màu nền: trên remote chọn **Nền ◐**. Màu áp dụng cho toàn bộ bài đang mở và đồng bộ sang máy tính; nền giao diện remote giữ nguyên. Cần Publish `firebase.rules.json` mới để cho phép trường `background`.
