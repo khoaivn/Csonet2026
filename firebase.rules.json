@@ -4,8 +4,8 @@
     ".write": false,
     "slideRooms": {
       "$room": {
-        ".read": "$room.matches(/^[a-f0-9]{32}$/) && (!data.exists() || data.child('expiresAt').val() > now)",
-        ".write": "$room.matches(/^[a-f0-9]{32}$/) && ((!newData.exists() && data.exists()) || (newData.exists() && newData.child('expiresAt').isNumber() && newData.child('expiresAt').val() > now && ((!data.exists() || (newData.child('sessionId').isString() && newData.child('sessionId').val() !== data.child('sessionId').val())) && newData.child('expiresAt').val() <= now + 14460000 || (data.exists() && data.child('expiresAt').val() > now && newData.child('expiresAt').val() === data.child('expiresAt').val() && newData.child('total').val() === data.child('total').val() && newData.child('sessionId').val() === data.child('sessionId').val()))))",
+        ".read": "auth !== null && auth.token.email === 'dung.phamtrung@phenikaa-uni.edu.vn' && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && ($room.matches(/^[a-f0-9]{32}$/) && (!data.exists() || data.child('expiresAt').val() > now))",
+        ".write": "auth !== null && auth.token.email === 'dung.phamtrung@phenikaa-uni.edu.vn' && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && ($room.matches(/^[a-f0-9]{32}$/) && ((!newData.exists() && data.exists()) || (newData.exists() && newData.child('expiresAt').isNumber() && newData.child('expiresAt').val() > now && ((!data.exists() || (newData.child('sessionId').isString() && newData.child('sessionId').val() !== data.child('sessionId').val())) && newData.child('expiresAt').val() <= now + 14460000 || (data.exists() && data.child('expiresAt').val() > now && newData.child('expiresAt').val() === data.child('expiresAt').val() && newData.child('total').val() === data.child('total').val() && newData.child('sessionId').val() === data.child('sessionId').val())))))",
         ".validate": "newData.hasChildren(['expiresAt','total','state'])",
         "expiresAt": {
           ".validate": "newData.isNumber()"

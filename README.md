@@ -55,3 +55,5 @@ No PDF manuscript or analytics is bundled. A font stylesheet is loaded from a CD
 ## iPhone remote control
 
 See [REMOTE-SETUP.md](REMOTE-SETUP.md) for Firebase setup and Internet control. Open the phone icon on the presentation toolbar to create a room, then open its private link on iPhone.
+
+Remote access requires Google sign-in as the owner account. Firebase Authentication Web config is in `firebase-config.js`; publish the matching `firebase.rules.json` to enforce access server-side. See REMOTE-SETUP.md for setup.

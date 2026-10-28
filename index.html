@@ -97,7 +97,7 @@
 <canvas id="annotationCanvas" aria-label="Slide annotations"></canvas><div id="laserPointer" hidden aria-hidden="true"></div>
 <dialog id="remoteDialog"><button id="remoteClose" aria-label="Đóng">×</button><h2>Điều khiển qua Internet</h2>
 <div id="remoteSetup"><p>Trang slide tự kết nối khi mở. iPhone dùng liên kết cố định cho mọi lần thuyết trình.</p><label for="databaseUrl">Firebase Realtime Database URL</label><input id="databaseUrl" type="url" placeholder="https://your-project-default-rtdb.asia-southeast1.firebasedatabase.app"><button id="remoteStart">Kết nối lại</button><p>Lần đầu sử dụng: xem file REMOTE-SETUP.md trong repository để tạo Firebase và cấu hình Rules.</p></div>
-<div id="remoteConnection" hidden><p>Lưu liên kết cố định này trên iPhone và mở bằng Safari. Mỗi phiên điều khiển có hiệu lực 4 giờ.</p><input id="remoteLink" readonly aria-label="Liên kết điều khiển"><button id="remoteCopy">Sao chép liên kết</button><button id="remoteStop">Ngắt kết nối</button><p>Người có liên kết có thể điều khiển slide.</p></div><p id="remoteStatus" role="status"></p></dialog>
+<div id="remoteConnection" hidden><p>Lưu liên kết cố định này trên iPhone và mở bằng Safari. Mỗi phiên điều khiển có hiệu lực 4 giờ.</p><input id="remoteLink" readonly aria-label="Liên kết điều khiển"><button id="remoteCopy">Sao chép liên kết</button><button id="remoteStop">Ngắt kết nối</button><p>Chỉ tài khoản Google chủ sở hữu được điều khiển sau khi đăng nhập.</p></div><p id="remoteStatus" role="status"></p></dialog>
 <script src="script.js"></script><script src="remote.js"></script>
 </body>
 </html>

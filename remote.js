@@ -1,10 +1,13 @@
 'use strict';
-(() => {
+(async() => {
  if(new URLSearchParams(location.search).has('preview'))return;
  const $ = id => document.getElementById(id);
  const DEFAULT_DATABASE='https://slides-35d62-default-rtdb.asia-southeast1.firebasedatabase.app';
  const FIXED_ROOM='464f25357d6c0340eca766a44c6824ce';
  const controller = document.body.dataset.remote === 'controller';
+ let access;
+ try{const {authorizeRemote}=await import('./remote-auth.js');access=await authorizeRemote({controller});}
+ catch(error){$('remoteStatus').textContent=error.message;return;}
  let database='', room='', timer, session=null, busy=false, applied='', disposed=false;
  let writeQueue=Promise.resolve();
  let hostSessionId='',phoneSessionId='',fixedController=false;
@@ -25,9 +28,10 @@
   try{await request('/annotation','PUT',value);}catch(error){status('Không gửi được Laser/Pen. Kiểm tra mạng và Publish Rules mới.');}
   finally{annotationSending=false;if(annotationPending)annotationTimer=setTimeout(flushAnnotation,80);}
  }
- function startAnnotationStream(){
+ async function startAnnotationStream(){
   annotationStream?.close();
-  annotationStream=new EventSource(`${database}/slideRooms/${room}/annotation.json`);
+  const token=await access.getToken();if(disposed)return;
+  annotationStream=new EventSource(`${database}/slideRooms/${room}/annotation.json?auth=${encodeURIComponent(token)}`);
   annotationStream.addEventListener('put',event=>{
    try{const value=JSON.parse(event.data);if(value.path==='/'&&value.data)window.deckRemote.annotation(value.data);}catch{status('Không đọc được dữ liệu Laser/Pen.');}
   });
@@ -66,13 +70,16 @@
   setTool('swipe');
  }
  const status = message => { $('remoteStatus').textContent=message; };
+ window.addEventListener('remote-access-lost',()=>{disposed=true;connected=false;session=null;annotationPending=null;clearTimeout(timer);clearTimeout(annotationTimer);annotationStream?.close();if(controller)buttons(true);status('Đã ngắt kết nối: cần đăng nhập lại.');});
+ access.onTokenChanged(()=>{if(!controller&&session&&!disposed)startAnnotationStream().catch(error=>status(error.message));});
  function validateDatabase(value) {
   const url=new URL(value.trim());
   if(url.protocol!=='https:' || !/^[a-z0-9-]+\.(?:[a-z0-9-]+\.)?(?:firebasedatabase\.app|firebaseio\.com)$/.test(url.hostname) || url.pathname!=='/' || url.search || url.hash) throw Error('Database URL chưa đúng. Hãy sao chép URL từ Firebase Realtime Database.');
   return url.origin;
  }
  async function request(path='',method='GET',data) {
-  const response=await fetch(`${database}/slideRooms/${room}${path}.json`,{method,cache:'no-store',headers:{'Content-Type':'application/json'},body:data===undefined?undefined:JSON.stringify(data),signal:AbortSignal.timeout(10000)});
+  const token=await access.getToken();
+  const response=await fetch(`${database}/slideRooms/${room}${path}.json?auth=${encodeURIComponent(token)}`,{method,cache:'no-store',headers:{'Content-Type':'application/json'},body:data===undefined?undefined:JSON.stringify(data),signal:AbortSignal.timeout(10000)});
   if(!response.ok){const denied=response.status===401||response.status===403;const error=Error(denied?'Không có quyền truy cập hoặc phòng đã hết hạn. Kiểm tra Firebase Rules.':`Lỗi kết nối (${response.status}).`);error.permissionDenied=denied;throw error;}
   return response.json();
  }
@@ -136,7 +143,7 @@
    await request('','PUT',session);
    const link=new URL('remote.html',location.href);if(database!==DEFAULT_DATABASE)link.hash=new URLSearchParams({db:database}).toString();
    $('remoteLink').value=link.href;$('remoteConnection').hidden=false;$('remoteSetup').hidden=true;
-   disposed=false;startAnnotationStream();poll();
+   disposed=false;startAnnotationStream().catch(error=>status(error.message));poll();
   } catch(error){status(error.message);session=null;if(automatic&&!$('remoteDialog').open)$('remoteDialog').showModal();}finally{$('remoteStart').disabled=false;}
  }
  async function sendSlide(slide) {
