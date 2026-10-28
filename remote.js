@@ -8,7 +8,7 @@
  const FIXED_ROOM='464f25357d6c0340eca766a44c6824ce';
  const controller = document.body.dataset.remote === 'controller';
  let access;
- try{const {authorizeRemote}=await import('./remote-auth.js?v=20261028-decks2');access=await authorizeRemote({controller});}
+ try{const {authorizeRemote}=await import('./remote-auth.js?v=20261028-decks3');access=await authorizeRemote({controller});}
  catch(error){$('remoteStatus').textContent=error.message;return;}
  let database='', room='', timer, session=null, busy=false, applied='', disposed=false;
  let writeQueue=Promise.resolve();
@@ -159,7 +159,7 @@
    const link=new URL('remote.html',location.href);if(database!==DEFAULT_DATABASE)link.hash=new URLSearchParams({db:database}).toString();
    $('remoteLink').value=link.href;$('remoteConnection').hidden=false;$('remoteSetup').hidden=true;
    disposed=false;startAnnotationStream().catch(error=>status(error.message));poll();
-  } catch(error){status(error.message);session=null;if(automatic&&!$('remoteDialog').open)$('remoteDialog').showModal();}finally{$('remoteStart').disabled=false;}
+  } catch(error){status(error.message);session=null;if(automatic)console.warn('Remote connection unavailable:',error.message);}finally{$('remoteStart').disabled=false;}
  }
  async function sendSlide(slide) {
   if(busy || !session || slide<0 || slide>=session.total)return;

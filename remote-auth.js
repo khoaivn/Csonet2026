@@ -1,4 +1,4 @@
-import { firebaseConfig, ownerEmail } from './firebase-config.js?v=20261028-decks2';
+import { firebaseConfig, ownerEmail } from './firebase-config.js?v=20261028-decks3';
 
 // The database Rules enforce the same identity; this panel is only the UI gate.
 export async function authorizeRemote({ controller }) {
@@ -9,7 +9,7 @@ export async function authorizeRemote({ controller }) {
  parent.prepend(panel);
  if(controller)document.querySelector('.remote-page').hidden=true;
  const explain=text=>{message.textContent=text;};
- const reveal=()=>{panel.hidden=true;if(controller)document.querySelector('.remote-page').hidden=false;};
+ const reveal=()=>{panel.hidden=true;if(controller)document.querySelector('.remote-page').hidden=false;else if(parent.open)parent.close();};
  if(!firebaseConfig.apiKey){explain('Chưa có Firebase Web apiKey. Cần điền firebaseConfig và bật Google trong Firebase Authentication.');login.disabled=true;if(!controller)parent.showModal();throw Error('Thiếu cấu hình Firebase Authentication.');}
  let appSdk,authSdk;
  try{
