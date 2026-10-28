@@ -59,3 +59,9 @@ body[data-remote] .remote-page{padding-bottom:max(8px,env(safe-area-inset-bottom
  body[data-remote] .remote-page{padding-bottom:max(8px,env(safe-area-inset-left))}
  .remote-preview{width:min(100%,calc((100dvw - 100px - env(safe-area-inset-left) - env(safe-area-inset-right))*16/9))}
 }
+
+/* In the rotated portrait view, align content with the phone's top edge. */
+@media screen and (orientation:portrait){
+ body[data-remote] .remote-page{padding-left:0}
+ .remote-slide-pane{align-items:flex-start}
+}
