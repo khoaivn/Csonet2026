@@ -69,3 +69,15 @@ body[data-remote] .remote-page{padding-bottom:max(8px,env(safe-area-inset-bottom
 /* Keep connection status and logout above the slide column. */
 .remote-slide-pane>.remote-heading{width:100%;flex:none;box-sizing:border-box}
 .remote-slide-pane>.remote-heading .remote-account{margin-left:auto}
+
+/* Center page navigation in the free area, with drawing tools on the right. */
+.remote-slide-pane>.remote-control-panel{
+ display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;
+ align-content:center;gap:10px;flex:1;min-height:44px;
+}
+.remote-control-panel>.remote-page-navigation{
+ grid-column:1;grid-row:1;display:flex;align-items:center;justify-content:center;
+ gap:10px;min-width:0;align-self:center;
+}
+.remote-control-panel>.remote-tools{grid-column:2;grid-row:1;justify-self:end;align-self:center}
+.remote-page-navigation select{flex:0 1 110px;width:110px}
