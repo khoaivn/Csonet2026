@@ -65,3 +65,7 @@ body[data-remote] .remote-page{padding-bottom:max(8px,env(safe-area-inset-bottom
  body[data-remote] .remote-page{padding-left:0}
  .remote-slide-pane{align-items:flex-start}
 }
+
+/* Keep connection status and logout above the slide column. */
+.remote-slide-pane>.remote-heading{width:100%;flex:none;box-sizing:border-box}
+.remote-slide-pane>.remote-heading .remote-account{margin-left:auto}
