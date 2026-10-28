@@ -7,7 +7,7 @@
 
 Đẩy tất cả file cập nhật và file mới lên GitHub Pages. **Publish lại firebase.rules.json** để cho phép trường nhận diện bài thuyết trình mới. Xem [REMOTE-SETUP.md](REMOTE-SETUP.md) để cấu hình đăng nhập riêng tư.
 
-Mở thư viện tại `https://khoaivn.github.io/Csonet2026/`. Mỗi bài vẫn mở trực tiếp bằng đường dẫn tương ứng.
+Mở thư viện tại `https://khoaivn.github.io/slides/`. Mỗi bài vẫn mở trực tiếp bằng đường dẫn tương ứng.
 
 ## Open locally
 
