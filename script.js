@@ -107,4 +107,4 @@ function receiveRemoteAnnotation(data){
   remoteLaserTimer=setTimeout(()=>{$('laserPointer').hidden=true;clearLaserTrail();},700);
  }else{$('laserPointer').hidden=true;clearLaserTrail();}
 }
-window.deckRemote={go,current:()=>current,total:slides.length,annotation:receiveRemoteAnnotation};
+window.deckRemote={go,current:()=>current,total:slides.length,annotation:receiveRemoteAnnotation,geometry:()=>{const b=annotationBounds();return {left:b.left,top:b.top,width:b.width,height:b.height,viewportWidth:innerWidth,viewportHeight:innerHeight};}};

@@ -2,6 +2,7 @@
 (async() => {
  if(new URLSearchParams(location.search).has('preview'))return;
  const $ = id => document.getElementById(id);
+ const {slidePoint}=await import('./remote-coordinates.mjs?v=20261028-coordinates8');
  const DEFAULT_DATABASE='https://slides-35d62-default-rtdb.asia-southeast1.firebasedatabase.app';
  const PRESENTATIONS={csonet:{path:'NCS-csonet2026.html',title:'CSONET'},'chuyen-de-2':{path:'NCS-CD2.html',title:'Chuyên đề 2'}};
  let loadedPresentation=null;
@@ -62,17 +63,17 @@
  function setupTools(){
   const surface=$('remoteSurface');
   const rotated=()=>matchMedia('(orientation:portrait)').matches;
-  const point=event=>{const b=surface.getBoundingClientRect();const x=rotated()?(event.clientY-b.top)/b.height:(event.clientX-b.left)/b.width;const y=rotated()?(b.right-event.clientX)/b.width:(event.clientY-b.top)/b.height;return {x:Math.max(0,Math.min(1280,x*1280)),y:Math.max(0,Math.min(720,y*720))};};
+  const point=event=>slidePoint(event.clientX,event.clientY,$('remotePreview').getBoundingClientRect(),rotated(),preview().geometry());
   document.querySelectorAll('[data-tool]').forEach(button=>button.onclick=()=>setTool(button.dataset.tool));
   $('remoteClear').onclick=()=>{if(!connected)return;phoneInk.delete(session.state.slide);laser=null;queueAnnotation();};
   surface.addEventListener('pointerdown',event=>{
-   if(!connected||busy||gesture||event.button!==0)return;
+   if(!connected||busy||gesture||event.button!==0||!preview()?.geometry)return;
    event.preventDefault();surface.setPointerCapture(event.pointerId);gesture={x:event.clientX,y:event.clientY,id:event.pointerId,slide:session.state.slide};
    if(tool==='pen'){const strokes=phoneInk.get(gesture.slide)||[];if(strokes.reduce((n,s)=>n+s.length,0)>=4000){gesture=null;status('Nét vẽ đã đầy. Xóa nét trước khi vẽ tiếp.');return;}stroke=[point(event)];strokes.push(stroke);phoneInk.set(gesture.slide,strokes);queueAnnotation();}
    if(tool==='laser'){laser=point(event);queueAnnotation();}
   });
   surface.addEventListener('pointermove',event=>{
-   if(!gesture||gesture.id!==event.pointerId)return;
+   if(!gesture||gesture.id!==event.pointerId||!preview()?.geometry)return;
    if(tool==='laser'){laser=point(event);queueAnnotation();}
    if(tool==='pen'&&stroke){const strokes=phoneInk.get(gesture.slide)||[];if(strokes.reduce((n,s)=>n+s.length,0)>=4000){status('Nét vẽ đã đầy. Xóa nét trước khi vẽ tiếp.');return;}stroke.push(point(event));queueAnnotation();}
   });
