@@ -43,3 +43,7 @@ Chỉ tài khoản Google **dung.phamtrung@phenikaa-uni.edu.vn** được đọc
 Firebase chỉ nhận trạng thái phòng, lệnh và tọa độ Laser/Pen. Slide và ghi chú tải từ GitHub Pages. Nét vẽ giữ trong phiên hiện tại; tải lại điện thoại có thể làm mất nét khi vẽ lại. Phòng hết hạn không tự xóa; có thể dọn dữ liệu cũ trong Firebase Console. Theo dõi Usage theo gói Firebase của project.
 
 Tài liệu chính thức: https://firebase.google.com/docs/auth/web/google-signin và https://firebase.google.com/docs/database/security/rules-conditions
+
+## Điện thoại chờ dù trang slide đã mở
+
+Trang slide và iPhone đều phải đăng nhập tài khoản chủ sở hữu. Trên máy tính, nhấn icon điện thoại và kiểm tra trạng thái: nếu có Firebase từ chối ghi phòng, phiên chưa được tạo; kiểm tra Rules đã Publish. Nếu điện thoại báo Firebase từ chối đọc phòng, kiểm tra quyền của tài khoản và Rules. Chỉ thông báo đang chờ khi đọc được database nhưng chưa có phiên hoặc phiên hết hạn.

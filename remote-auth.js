@@ -1,4 +1,4 @@
-import { firebaseConfig, ownerEmail } from './firebase-config.js';
+import { firebaseConfig, ownerEmail } from './firebase-config.js?v=20261028-auth2';
 
 // The database Rules enforce the same identity; this panel is only the UI gate.
 export async function authorizeRemote({ controller }) {
@@ -49,7 +49,7 @@ export async function authorizeRemote({ controller }) {
   },error=>explain(errors[error.code]||'Không kiểm tra được trạng thái đăng nhập.'));
  });
  const account=document.createElement('div');account.className='remote-account';
- const label=document.createElement('span');label.textContent='Đã đăng nhập tài khoản chủ sở hữu';
+ const label=document.createElement('span');label.textContent=`Đã đăng nhập: ${auth.currentUser.email}`;
  const logout=document.createElement('button');logout.type='button';logout.textContent='Đăng xuất';
  logout.onclick=async()=>{window.dispatchEvent(new Event('remote-access-lost'));await authSdk.signOut(auth);location.reload();};
  account.append(label,logout);parent.append(account);

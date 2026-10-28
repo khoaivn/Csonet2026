@@ -6,7 +6,7 @@
  const FIXED_ROOM='464f25357d6c0340eca766a44c6824ce';
  const controller = document.body.dataset.remote === 'controller';
  let access;
- try{const {authorizeRemote}=await import('./remote-auth.js');access=await authorizeRemote({controller});}
+ try{const {authorizeRemote}=await import('./remote-auth.js?v=20261028-auth2');access=await authorizeRemote({controller});}
  catch(error){$('remoteStatus').textContent=error.message;return;}
  let database='', room='', timer, session=null, busy=false, applied='', disposed=false;
  let writeQueue=Promise.resolve();
@@ -69,7 +69,7 @@
   document.addEventListener('visibilitychange',()=>{if(document.hidden){gesture=null;stroke=null;laser=null;queueAnnotation();}});
   setTool('swipe');
  }
- const status = message => { $('remoteStatus').textContent=message; };
+ const status = message => { $('remoteStatus').textContent=message;if(!controller){const button=$('remoteBtn');button.title=`Điều khiển điện thoại: ${message}`;button.setAttribute('aria-label',button.title);} };
  window.addEventListener('remote-access-lost',()=>{disposed=true;connected=false;session=null;annotationPending=null;clearTimeout(timer);clearTimeout(annotationTimer);annotationStream?.close();if(controller)buttons(true);status('Đã ngắt kết nối: cần đăng nhập lại.');});
  access.onTokenChanged(()=>{if(!controller&&session&&!disposed)startAnnotationStream().catch(error=>status(error.message));});
  function validateDatabase(value) {
@@ -80,7 +80,7 @@
  async function request(path='',method='GET',data) {
   const token=await access.getToken();
   const response=await fetch(`${database}/slideRooms/${room}${path}.json?auth=${encodeURIComponent(token)}`,{method,cache:'no-store',headers:{'Content-Type':'application/json'},body:data===undefined?undefined:JSON.stringify(data),signal:AbortSignal.timeout(10000)});
-  if(!response.ok){const denied=response.status===401||response.status===403;const error=Error(denied?'Không có quyền truy cập hoặc phòng đã hết hạn. Kiểm tra Firebase Rules.':`Lỗi kết nối (${response.status}).`);error.permissionDenied=denied;throw error;}
+  if(!response.ok){const denied=response.status===401||response.status===403;const action=method==='GET'?'đọc phòng':'ghi phòng';const error=Error(denied?`Firebase từ chối ${action} (HTTP ${response.status}). Kiểm tra tài khoản Google và Publish đúng firebase.rules.json mới nhất.`:`Lỗi kết nối (${response.status}).`);error.permissionDenied=denied;throw error;}
   return response.json();
  }
  function buttons(disabled) { document.querySelectorAll('[data-remote-nav]').forEach(button=>button.disabled=disabled); }
@@ -129,7 +129,7 @@
     await publishState();
     status('Phòng đang mở · iPhone có thể kết nối');
    }
-  } catch(error){status(controller&&fixedController&&error.permissionDenied?'Đang chờ máy tính mở trang slide. Nếu trang slide đang mở, kiểm tra Firebase Rules mới.':error.message);if(controller){connected=false;buttons(true);}}
+  } catch(error){status(error.message);if(controller){connected=false;buttons(true);}}
   if(!disposed)timer=setTimeout(poll,1000);
  }
  async function startHost(automatic=false) {
