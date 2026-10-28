@@ -61,7 +61,8 @@
  }
  function setupTools(){
   const surface=$('remoteSurface');
-  const point=event=>{const b=surface.getBoundingClientRect();return {x:Math.max(0,Math.min(1280,(event.clientX-b.left)/b.width*1280)),y:Math.max(0,Math.min(720,(event.clientY-b.top)/b.height*720))};};
+  const rotated=()=>matchMedia('(orientation:portrait)').matches;
+  const point=event=>{const b=surface.getBoundingClientRect();const x=rotated()?(event.clientY-b.top)/b.height:(event.clientX-b.left)/b.width;const y=rotated()?(b.right-event.clientX)/b.width:(event.clientY-b.top)/b.height;return {x:Math.max(0,Math.min(1280,x*1280)),y:Math.max(0,Math.min(720,y*720))};};
   document.querySelectorAll('[data-tool]').forEach(button=>button.onclick=()=>setTool(button.dataset.tool));
   $('remoteClear').onclick=()=>{if(!connected)return;phoneInk.delete(session.state.slide);laser=null;queueAnnotation();};
   surface.addEventListener('pointerdown',event=>{
@@ -78,7 +79,7 @@
   function finish(event){
    if(!gesture||gesture.id!==event.pointerId)return;
    const previous=gesture;gesture=null;stroke=null;
-   if(tool==='swipe'&&event.type==='pointerup'){const dx=event.clientX-previous.x,dy=event.clientY-previous.y;if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy)*1.3)sendSlide(previous.slide+(dx<0?1:-1));}
+   if(tool==='swipe'&&event.type==='pointerup'){const dx=rotated()?event.clientY-previous.y:event.clientX-previous.x,dy=rotated()?previous.x-event.clientX:event.clientY-previous.y;if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy)*1.3)sendSlide(previous.slide+(dx<0?1:-1));}
    else{laser=null;queueAnnotation();}
   }
   for(const event of ['pointerup','pointercancel','lostpointercapture'])surface.addEventListener(event,finish);
