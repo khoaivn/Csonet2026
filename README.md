@@ -64,3 +64,7 @@ No PDF manuscript or analytics is bundled. A font stylesheet is loaded from a CD
 See [REMOTE-SETUP.md](REMOTE-SETUP.md) for Firebase setup and Internet control. Open the phone icon on the presentation toolbar to create a room, then open its private link on iPhone.
 
 Remote access requires Google sign-in as the owner account. Firebase Authentication Web config is in `firebase-config.js`; publish the matching `firebase.rules.json` to enforce access server-side. See REMOTE-SETUP.md for setup.
+
+Tên file trong liên kết có thể nhập hoa/thường nhờ `404.html` tự chuyển về tên chuẩn. Ví dụ `ncs-csonet2026.html`, `NCS-CSONET2026.HTML` đều chuyển về `NCS-csonet2026.html`; tham số và số trang sau dấu # được giữ nguyên. Cần bật JavaScript trên trình duyệt.
+
+Đường dẫn không tồn tại hoặc nhập sai được `404.html` tự chuyển về `index.html`, là danh sách các bài thuyết trình.

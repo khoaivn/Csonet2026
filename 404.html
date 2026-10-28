@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mở bài thuyết trình</title><style>body{margin:0;background:#fbfaf6;color:#142b3b;font:17px/1.6 system-ui,sans-serif}main{max-width:640px;margin:15vh auto;padding:24px}a{color:#087f81}</style></head>
+<body><main><h1 id="title">Không tìm thấy trang</h1><p id="message">Kiểm tra lại đường dẫn hoặc trở về thư viện bài thuyết trình.</p><a href="/Csonet2026/index.html">Mở thư viện bài thuyết trình</a></main>
+<script>
+(() => {
+ const canonical={
+  'ncs-csonet2026.html':'NCS-csonet2026.html',
+  'ncs-cd2.html':'NCS-CD2.html',
+  'remote.html':'remote.html',
+  'index.html':'index.html'
+ };
+ const library='/Csonet2026/index.html';
+ let filename='';
+ try{filename=decodeURIComponent(location.pathname.split('/').pop()).toLowerCase();}catch{}
+ const target=canonical[filename];
+ const path=target?'/Csonet2026/'+target:library;
+ if(path===location.pathname)return;
+ document.getElementById('title').textContent=target?'Đang mở bài thuyết trình…':'Đang mở danh sách bài thuyết trình…';
+ document.getElementById('message').textContent=target?'Tự chuyển sang đường dẫn đúng.':'Đường dẫn không tồn tại. Đang trở về thư viện.';
+ location.replace(path+(target?location.search+location.hash:''));
+})();
+</script></body></html>
