@@ -129,6 +129,7 @@
  }
  async function poll() {
   if(disposed)return;
+  if(!controller&&session&&session.expiresAt<=Date.now()){await startHost(true);return;}
   try {
    const value=await request();
    if(!value || value.expiresAt<=Date.now()){
@@ -138,6 +139,7 @@
    if(!controller&&value.sessionId!==hostSessionId){disposed=true;annotationStream?.close();session=null;$('remoteSetup').hidden=false;$('remoteConnection').hidden=true;status('Đã chuyển quyền điều khiển sang phiên máy tính mới.');return;}
    if(controller&&phoneSessionId!==(value.sessionId||'')){phoneSessionId=value.sessionId||'';lastHeartbeat=null;lastHeartbeatAt=0;heartbeatConfirmed=false;busy=false;applied='';previewSlide=-1;phoneInk.clear();gesture=null;stroke=null;laser=null;annotationPending=null;}
    if(disposed)return;
+   if(!controller&&value.expiresAt-Date.now()<60000){session=value;await startHost(true);return;}
    session=value;
    if(!controller)window.deckRemote.background(value.background||'#ffffff');
    if(controller) {
@@ -166,6 +168,9 @@
   if(!disposed)timer=setTimeout(poll,1000);
  }
  async function startHost(automatic=false) {
+  clearTimeout(timer);
+  disposed=false;
+  const previous=session;
   $('remoteStart').disabled=true;
   try {
    database=validateDatabase($('databaseUrl').value);
@@ -173,11 +178,13 @@
    room=FIXED_ROOM;hostSessionId=crypto.randomUUID();applied='';
    const slides=window.deckRemote.total;
    session={presentation:document.body.dataset.presentation||'csonet',sessionId:hostSessionId,total:slides,expiresAt:Date.now()+4*60*60*1000,state:{slide:window.deckRemote.current(),ack:'',heartbeat:{'.sv':'timestamp'}}};
+   if(previous?.background)session.background=previous.background;
+   if(previous?.annotation)session.annotation=previous.annotation;
    await request('','PUT',session);
    const link=new URL('remote.html',location.href);if(database!==DEFAULT_DATABASE)link.hash=new URLSearchParams({db:database}).toString();
    $('remoteLink').value=link.href;$('remoteConnection').hidden=false;$('remoteSetup').hidden=true;
    disposed=false;startAnnotationStream().catch(error=>status(error.message));poll();
-  } catch(error){status(error.message);session=null;if(automatic)console.warn('Remote connection unavailable:',error.message);}finally{$('remoteStart').disabled=false;}
+  } catch(error){status(error.message+' · Đang tự thử kết nối lại…');session=null;if(!disposed)timer=setTimeout(()=>startHost(true),5000);}finally{$('remoteStart').disabled=false;}
  }
  async function sendSlide(slide) {
   if(busy || !session || slide<0 || slide>=session.total)return;

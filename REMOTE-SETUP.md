@@ -53,3 +53,5 @@ Trang slide và iPhone đều phải đăng nhập tài khoản chủ sở hữu
 Trang gốc `index.html` là thư viện chọn bài. Bài CSONET nằm tại `NCS-csonet2026.html`, Chuyên đề 2 tại `NCS-CD2.html`. Trang thư viện không tạo phiên remote; bài đang mở trên máy tính tạo phiên với mã bài để iPhone tải đúng slide và ghi chú. Cần Publish Rules mới cho trường `presentation`.
 
 Đổi màu nền: trên remote chọn **Nền ◐**. Màu áp dụng cho toàn bộ bài đang mở và đồng bộ sang máy tính; nền giao diện remote giữ nguyên. Cần Publish `firebase.rules.json` mới để cho phép trường `background`.
+
+Tự kết nối: đăng nhập tài khoản chủ sở hữu trên máy tính và điện thoại. Máy tính tự tạo phòng khi mở bài slide, thử lại sau 5 giây nếu chưa kết nối được và tự tạo phiên mới trước khi hết hạn 4 giờ. Giữ trang slide trên máy tính hoạt động; điện thoại tự nhận phiên mới qua liên kết remote cố định.
