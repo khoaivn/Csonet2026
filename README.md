@@ -3,6 +3,7 @@
 - `index.html`: trang chọn bài.
 - `NCS-csonet2026.html`: bài CSONET gốc, 12 trang.
 - `NCS-CD2.html`: Chuyên đề 2, hiện có 1 trang tiêu đề, chưa có nội dung chuyên đề.
+- `LTC-introduction.html`: bài giới thiệu lập trình C/C++, giữ nguyên 26 trang từ PowerPoint.
 - `remote.html`: liên kết cố định điều khiển trên iPhone. Tự tải bài đang mở trên máy tính, dùng chung đăng nhập, vuốt, Laser/Pen và ghi chú.
 
 Đẩy tất cả file cập nhật và file mới lên GitHub Pages. **Publish lại firebase.rules.json** để cho phép trường nhận diện bài thuyết trình mới. Xem [REMOTE-SETUP.md](REMOTE-SETUP.md) để cấu hình đăng nhập riêng tư.
@@ -68,3 +69,5 @@ Remote access requires Google sign-in as the owner account. Firebase Authenticat
 Tên file trong liên kết có thể nhập hoa/thường nhờ `404.html` tự chuyển về tên chuẩn. Ví dụ `ncs-csonet2026.html`, `NCS-CSONET2026.HTML` đều chuyển về `NCS-csonet2026.html`; tham số và số trang sau dấu # được giữ nguyên. Cần bật JavaScript trên trình duyệt.
 
 Đường dẫn không tồn tại hoặc nhập sai được `404.html` tự chuyển về `index.html`, là danh sách các bài thuyết trình.
+
+Nút toàn màn hình trên điện thoại gửi yêu cầu tới máy tính và hiển thị trạng thái thực tế. Khi trình duyệt chặn bật toàn màn hình từ xa, bấm nút xác nhận xuất hiện trên máy tính. Có thể thoát hoặc hủy yêu cầu từ điện thoại. Cần xuất bản `firebase.rules.json` mới để nhận lệnh và trạng thái toàn màn hình.

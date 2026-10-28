@@ -26,6 +26,12 @@
           },
           "$other": {
             ".validate": false
+          },
+          "fullscreen": {
+            ".validate": "newData.isBoolean()"
+          },
+          "fullscreenPending": {
+            ".validate": "newData.isBoolean()"
           }
         },
         "command": {
@@ -38,6 +44,12 @@
           },
           "$other": {
             ".validate": false
+          },
+          "action": {
+            ".validate": "newData.val() === 'fullscreen' && newData.parent().hasChild('enabled')"
+          },
+          "enabled": {
+            ".validate": "newData.isBoolean() && newData.parent().child('action').val() === 'fullscreen'"
           }
         },
         "$other": {
@@ -71,7 +83,7 @@
           ".validate": "newData.isString() && newData.val().length <= 64"
         },
         "presentation": {
-          ".validate": "newData.isString() && (newData.val() === 'csonet' || newData.val() === 'chuyen-de-2')"
+          ".validate": "newData.isString() && (newData.val() === 'csonet' || newData.val() === 'chuyen-de-2' || newData.val() === 'ltc-introduction')"
         },
         "background": {
           ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
