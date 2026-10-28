@@ -4,8 +4,8 @@
     ".write": false,
     "slideRooms": {
       "$room": {
-        ".read": "$room.matches(/^[a-f0-9]{32}$/) && data.child('expiresAt').val() > now",
-        ".write": "$room.matches(/^[a-f0-9]{32}$/) && ((!data.exists() && newData.exists() && newData.child('expiresAt').isNumber() && newData.child('expiresAt').val() > now && newData.child('expiresAt').val() <= now + 14460000) || (data.exists() && data.child('expiresAt').val() > now && (!newData.exists() || (newData.child('expiresAt').val() === data.child('expiresAt').val() && newData.child('total').val() === data.child('total').val()))))",
+        ".read": "$room.matches(/^[a-f0-9]{32}$/) && (!data.exists() || data.child('expiresAt').val() > now)",
+        ".write": "$room.matches(/^[a-f0-9]{32}$/) && ((!newData.exists() && data.exists()) || (newData.exists() && newData.child('expiresAt').isNumber() && newData.child('expiresAt').val() > now && ((!data.exists() || (newData.child('sessionId').isString() && newData.child('sessionId').val() !== data.child('sessionId').val())) && newData.child('expiresAt').val() <= now + 14460000 || (data.exists() && data.child('expiresAt').val() > now && newData.child('expiresAt').val() === data.child('expiresAt').val() && newData.child('total').val() === data.child('total').val() && newData.child('sessionId').val() === data.child('sessionId').val()))))",
         ".validate": "newData.hasChildren(['expiresAt','total','state'])",
         "expiresAt": {
           ".validate": "newData.isNumber()"
@@ -66,6 +66,9 @@
           "$other": {
             ".validate": false
           }
+        },
+        "sessionId": {
+          ".validate": "newData.isString() && newData.val().length <= 64"
         }
       }
     }

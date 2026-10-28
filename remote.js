@@ -2,9 +2,12 @@
 (() => {
  if(new URLSearchParams(location.search).has('preview'))return;
  const $ = id => document.getElementById(id);
+ const DEFAULT_DATABASE='https://slides-35d62-default-rtdb.asia-southeast1.firebasedatabase.app';
+ const FIXED_ROOM='464f25357d6c0340eca766a44c6824ce';
  const controller = document.body.dataset.remote === 'controller';
  let database='', room='', timer, session=null, busy=false, applied='', disposed=false;
  let writeQueue=Promise.resolve();
+ let hostSessionId='',phoneSessionId='',fixedController=false;
  let annotationStream=null,previewSlide=-1,connected=false;
  let tool='swipe',gesture=null,stroke=null,laser=null;
  const phoneInk=new Map();
@@ -70,7 +73,7 @@
  }
  async function request(path='',method='GET',data) {
   const response=await fetch(`${database}/slideRooms/${room}${path}.json`,{method,cache:'no-store',headers:{'Content-Type':'application/json'},body:data===undefined?undefined:JSON.stringify(data),signal:AbortSignal.timeout(10000)});
-  if(!response.ok)throw Error(response.status===401||response.status===403?'Không có quyền truy cập hoặc phòng đã hết hạn. Kiểm tra Firebase Rules.':`Lỗi kết nối (${response.status}).`);
+  if(!response.ok){const denied=response.status===401||response.status===403;const error=Error(denied?'Không có quyền truy cập hoặc phòng đã hết hạn. Kiểm tra Firebase Rules.':`Lỗi kết nối (${response.status}).`);error.permissionDenied=denied;throw error;}
   return response.json();
  }
  function buttons(disabled) { document.querySelectorAll('[data-remote-nav]').forEach(button=>button.disabled=disabled); }
@@ -96,7 +99,12 @@
   if(disposed)return;
   try {
    const value=await request();
-   if(!value || value.expiresAt<=Date.now())throw Error('Phòng đã đóng hoặc hết hạn. Tạo phòng mới trên máy tính.');
+   if(!value || value.expiresAt<=Date.now()){
+    if(controller&&fixedController){connected=false;session=null;busy=false;buttons(true);status('Đang chờ máy tính bật điều khiển…');timer=setTimeout(poll,1500);return;}
+    throw Error('Phòng đã đóng hoặc hết hạn. Tạo phòng mới trên máy tính.');
+   }
+   if(!controller&&value.sessionId!==hostSessionId){disposed=true;annotationStream?.close();session=null;$('remoteSetup').hidden=false;$('remoteConnection').hidden=true;status('Đã chuyển quyền điều khiển sang phiên máy tính mới.');return;}
+   if(controller&&phoneSessionId!==(value.sessionId||'')){phoneSessionId=value.sessionId||'';busy=false;applied='';previewSlide=-1;phoneInk.clear();gesture=null;stroke=null;laser=null;annotationPending=null;}
    if(disposed)return;
    session=value;
    if(controller) {
@@ -114,7 +122,7 @@
     await publishState();
     status('Phòng đang mở · iPhone có thể kết nối');
    }
-  } catch(error){status(error.message);if(controller){connected=false;buttons(true);}}
+  } catch(error){status(controller&&fixedController&&error.permissionDenied?'Đang chờ máy tính bật điều khiển. Nếu máy tính đã bật, kiểm tra Firebase Rules mới.':error.message);if(controller){connected=false;buttons(true);}}
   if(!disposed)timer=setTimeout(poll,1000);
  }
  async function startHost() {
@@ -122,11 +130,11 @@
   try {
    database=validateDatabase($('databaseUrl').value);
    localStorage.setItem('csonetDatabase',database);
-   room=Array.from(crypto.getRandomValues(new Uint8Array(16)),n=>n.toString(16).padStart(2,'0')).join('');
+   room=FIXED_ROOM;hostSessionId=crypto.randomUUID();applied='';
    const slides=window.deckRemote.total;
-   session={total:slides,expiresAt:Date.now()+4*60*60*1000,state:{slide:window.deckRemote.current(),ack:'',heartbeat:{'.sv':'timestamp'}}};
+   session={sessionId:hostSessionId,total:slides,expiresAt:Date.now()+4*60*60*1000,state:{slide:window.deckRemote.current(),ack:'',heartbeat:{'.sv':'timestamp'}}};
    await request('','PUT',session);
-   const link=new URL('remote.html',location.href);link.hash=new URLSearchParams({db:database,room}).toString();
+   const link=new URL('remote.html',location.href);if(database!==DEFAULT_DATABASE)link.hash=new URLSearchParams({db:database}).toString();
    $('remoteLink').value=link.href;$('remoteConnection').hidden=false;$('remoteSetup').hidden=true;
    disposed=false;startAnnotationStream();poll();
   } catch(error){status(error.message);}finally{$('remoteStart').disabled=false;}
@@ -140,7 +148,7 @@
  if(controller) {
   (async()=>{
    try{
-    const params=new URLSearchParams(location.hash.slice(1));database=validateDatabase(params.get('db')||'');room=params.get('room')||'';
+    const params=new URLSearchParams(location.hash.slice(1));database=validateDatabase(params.get('db')||DEFAULT_DATABASE);room=params.get('room')||FIXED_ROOM;fixedController=!params.has('room');
     if(!/^[a-f0-9]{32}$/.test(room))throw Error('Liên kết không hợp lệ. Hãy mở liên kết từ máy tính.');
     const response=await fetch('index.html');if(!response.ok)throw Error('Không tải được nội dung slide.');
     window.remoteSlides=[...new DOMParser().parseFromString(await response.text(),'text/html').querySelectorAll('.slide')];
@@ -156,12 +164,12 @@
  } else {
   $('remoteBtn').onclick=()=>{$('remoteDialog').showModal();};
   $('remoteClose').onclick=()=>$('remoteDialog').close();
-  $('databaseUrl').value=localStorage.getItem('csonetDatabase')||'https://slides-35d62-default-rtdb.asia-southeast1.firebasedatabase.app';
+  $('databaseUrl').value=localStorage.getItem('csonetDatabase')||DEFAULT_DATABASE;
   $('remoteStart').onclick=startHost;
   $('remoteCopy').onclick=async()=>{try{await navigator.clipboard.writeText($('remoteLink').value);status('Đã sao chép liên kết. Gửi và mở bằng Safari trên iPhone.');}catch{$('remoteLink').select();status('Hãy sao chép liên kết trong ô phía trên.');}};
   $('remoteStop').onclick=async()=>{
    disposed=true;annotationStream?.close();clearTimeout(timer);await writeQueue.catch(()=>{});
-   try{await request('','DELETE');status('Đã đóng phòng.');}catch(error){status(error.message);}
+   try{const active=await request();if(active?.sessionId===hostSessionId)await request('','DELETE');status('Đã tắt điều khiển. Điện thoại sẽ chờ phiên tiếp theo.');}catch(error){status(error.message);}
    session=null;room='';$('remoteSetup').hidden=false;$('remoteConnection').hidden=true;
   };
   document.addEventListener('slidechange',()=>{if(session&&!disposed)publishState().catch(error=>status(error.message));});

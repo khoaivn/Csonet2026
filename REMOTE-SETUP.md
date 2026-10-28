@@ -44,3 +44,11 @@ Tham khảo chính thức: https://firebase.google.com/docs/reference/rest/datab
 `https://slides-35d62-default-rtdb.asia-southeast1.firebasedatabase.app` đã được điền sẵn làm giá trị mặc định trong `remote.js`. Vẫn cần Publish Rules trước khi tạo phòng.
 
 Laser/Pen sử dụng kết nối EventSource tới Firebase để nhận cập nhật liên tục. Bản xem trước là chính trang slide, nên cần đẩy đầy đủ các file thay đổi cùng lúc.
+
+## Liên kết cố định cho một người dùng
+
+Mở `https://khoaivn.github.io/Csonet2026/remote.html` trên iPhone và lưu dấu trang hoặc thêm vào Màn hình chính. Khi máy tính chưa bật điều khiển, điện thoại chờ; khi bật, điện thoại tự kết nối. Tắt rồi bật lại hoặc tạo phiên mới vẫn dùng cùng liên kết. Cần đẩy toàn bộ file cập nhật và Publish lại `firebase.rules.json`.
+
+Trên máy tính, chọn icon điện thoại → **Bật điều khiển**; cuối buổi chọn **Tắt điều khiển**. Một phiên kéo dài 4 giờ. Khi mở phiên mới trên máy tính khác, phiên máy tính cũ tự dừng để tránh điều khiển chồng nhau. Link cũ có mã phòng trong phần `#room` chỉ dùng cho phòng cũ; hãy lưu link cố định ở trên.
+
+Liên kết cố định không yêu cầu đăng nhập; bất kỳ ai có liên kết đều có thể điều khiển khi máy tính bật tính năng này.
