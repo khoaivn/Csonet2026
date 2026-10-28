@@ -14,6 +14,7 @@
  let writeQueue=Promise.resolve();
  let hostSessionId='',phoneSessionId='',fixedController=false;
  let annotationStream=null,previewSlide=-1,connected=false;
+ let lastHeartbeat=null,lastHeartbeatAt=0,heartbeatConfirmed=false;
  let tool='swipe',gesture=null,stroke=null,laser=null;
  const phoneInk=new Map();
  let annotationPending=null,annotationSending=false,annotationTimer;
@@ -125,15 +126,21 @@
     throw Error('Phòng đã đóng hoặc hết hạn. Tạo phòng mới trên máy tính.');
    }
    if(!controller&&value.sessionId!==hostSessionId){disposed=true;annotationStream?.close();session=null;$('remoteSetup').hidden=false;$('remoteConnection').hidden=true;status('Đã chuyển quyền điều khiển sang phiên máy tính mới.');return;}
-   if(controller&&phoneSessionId!==(value.sessionId||'')){phoneSessionId=value.sessionId||'';busy=false;applied='';previewSlide=-1;phoneInk.clear();gesture=null;stroke=null;laser=null;annotationPending=null;}
+   if(controller&&phoneSessionId!==(value.sessionId||'')){phoneSessionId=value.sessionId||'';lastHeartbeat=null;lastHeartbeatAt=0;heartbeatConfirmed=false;busy=false;applied='';previewSlide=-1;phoneInk.clear();gesture=null;stroke=null;laser=null;annotationPending=null;}
    if(disposed)return;
    session=value;
    if(controller) {
     await loadPresentation(value.presentation||'csonet');
     if(busy && value.state?.ack===applied)busy=false;
-    const live=Date.now()-(value.state?.heartbeat||0)<15000;connected=live;
+    // Observe heartbeat progress without comparing clocks on different devices.
+    const heartbeat=value.state?.heartbeat;
+    if(Number.isFinite(heartbeat)&&heartbeat!==lastHeartbeat){
+     heartbeatConfirmed=lastHeartbeat!==null;
+     lastHeartbeat=heartbeat;lastHeartbeatAt=performance.now();
+    }
+    const live=heartbeatConfirmed&&performance.now()-lastHeartbeatAt<15000;connected=live;
     buttons(!live||busy);showState(value.state);
-    status(live?(busy?'Đang chuyển slide…':'Đã kết nối với máy tính'):'Máy tính mất kết nối. Đang chờ kết nối lại…');
+    status(live?(busy?'Đang chuyển slide…':'Đã kết nối với máy tính'):(heartbeatConfirmed?'Máy tính mất kết nối. Đang chờ kết nối lại…':'Đang chờ tín hiệu từ máy tính…'));
     if(!live)buttons(true);
    } else {
     if(value.command && value.command.id!==applied) {
