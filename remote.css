@@ -81,3 +81,6 @@ body[data-remote] .remote-page{padding-bottom:max(8px,env(safe-area-inset-bottom
 }
 .remote-control-panel>.remote-tools{grid-column:2;grid-row:1;justify-self:end;align-self:center}
 .remote-page-navigation select{flex:0 1 110px;width:110px}
+
+.remote-control-panel .remote-navigation button{width:84px;height:57px;flex-shrink:0}
+.remote-slide-pane>.remote-control-panel{min-height:57px}
