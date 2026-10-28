@@ -3,10 +3,12 @@
  if(new URLSearchParams(location.search).has('preview'))return;
  const $ = id => document.getElementById(id);
  const DEFAULT_DATABASE='https://slides-35d62-default-rtdb.asia-southeast1.firebasedatabase.app';
+ const PRESENTATIONS={csonet:{path:'NCS-csonet2026.html',title:'CSONET'},'chuyen-de-2':{path:'NCS-CD2.html',title:'Chuyên đề 2'}};
+ let loadedPresentation=null;
  const FIXED_ROOM='464f25357d6c0340eca766a44c6824ce';
  const controller = document.body.dataset.remote === 'controller';
  let access;
- try{const {authorizeRemote}=await import('./remote-auth.js?v=20261028-auth2');access=await authorizeRemote({controller});}
+ try{const {authorizeRemote}=await import('./remote-auth.js?v=20261028-decks2');access=await authorizeRemote({controller});}
  catch(error){$('remoteStatus').textContent=error.message;return;}
  let database='', room='', timer, session=null, busy=false, applied='', disposed=false;
  let writeQueue=Promise.resolve();
@@ -15,6 +17,18 @@
  let tool='swipe',gesture=null,stroke=null,laser=null;
  const phoneInk=new Map();
  let annotationPending=null,annotationSending=false,annotationTimer;
+ async function loadPresentation(id){
+  if(!PRESENTATIONS[id])throw Error('Bài thuyết trình chưa được hỗ trợ. Tải lại website để cập nhật.');
+  if(loadedPresentation===id)return;
+  const response=await fetch(PRESENTATIONS[id].path,{cache:'no-store'});
+  if(!response.ok)throw Error('Không tải được nội dung bài thuyết trình.');
+  const parsed=new DOMParser().parseFromString(await response.text(),'text/html');
+  const list=[...parsed.querySelectorAll('.slide')];if(!list.length)throw Error('Bài thuyết trình chưa có trang slide.');
+  window.remoteSlides=list;$('remoteSlide').replaceChildren();
+  list.forEach((slide,index)=>{const option=document.createElement('option');option.value=index;option.textContent=`${index+1}. ${slide.dataset.title}`;$('remoteSlide').append(option);});
+  loadedPresentation=id;previewSlide=-1;
+  $('remotePreview').src=PRESENTATIONS[id].path+'?preview=1';
+ }
  function preview(){return $('remotePreview')?.contentWindow?.deckRemote;}
  function currentAnnotation(){const index=session?.state?.slide??0;return {slide:index,ink:JSON.stringify(phoneInk.get(index)||[]),laser:!!laser,x:laser?.x||0,y:laser?.y||0,at:Date.now()};}
  function queueAnnotation(){
@@ -115,6 +129,7 @@
    if(disposed)return;
    session=value;
    if(controller) {
+    await loadPresentation(value.presentation||'csonet');
     if(busy && value.state?.ack===applied)busy=false;
     const live=Date.now()-(value.state?.heartbeat||0)<15000;connected=live;
     buttons(!live||busy);showState(value.state);
@@ -139,7 +154,7 @@
    localStorage.setItem('csonetDatabase',database);
    room=FIXED_ROOM;hostSessionId=crypto.randomUUID();applied='';
    const slides=window.deckRemote.total;
-   session={sessionId:hostSessionId,total:slides,expiresAt:Date.now()+4*60*60*1000,state:{slide:window.deckRemote.current(),ack:'',heartbeat:{'.sv':'timestamp'}}};
+   session={presentation:document.body.dataset.presentation||'csonet',sessionId:hostSessionId,total:slides,expiresAt:Date.now()+4*60*60*1000,state:{slide:window.deckRemote.current(),ack:'',heartbeat:{'.sv':'timestamp'}}};
    await request('','PUT',session);
    const link=new URL('remote.html',location.href);if(database!==DEFAULT_DATABASE)link.hash=new URLSearchParams({db:database}).toString();
    $('remoteLink').value=link.href;$('remoteConnection').hidden=false;$('remoteSetup').hidden=true;
@@ -157,9 +172,6 @@
    try{
     const params=new URLSearchParams(location.hash.slice(1));database=validateDatabase(params.get('db')||DEFAULT_DATABASE);room=params.get('room')||FIXED_ROOM;fixedController=!params.has('room');
     if(!/^[a-f0-9]{32}$/.test(room))throw Error('Liên kết không hợp lệ. Hãy mở liên kết từ máy tính.');
-    const response=await fetch('index.html');if(!response.ok)throw Error('Không tải được nội dung slide.');
-    window.remoteSlides=[...new DOMParser().parseFromString(await response.text(),'text/html').querySelectorAll('.slide')];
-    window.remoteSlides.forEach((slide,index)=>{const option=document.createElement('option');option.value=index;option.textContent=`${index+1}. ${slide.dataset.title}`;$('remoteSlide').append(option);});
     $('remotePrevious').onclick=()=>sendSlide(session.state.slide-1);
     $('remoteNext').onclick=()=>sendSlide(session.state.slide+1);
     $('remoteSlide').onchange=event=>sendSlide(Number(event.target.value));

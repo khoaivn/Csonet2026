@@ -69,6 +69,9 @@
         },
         "sessionId": {
           ".validate": "newData.isString() && newData.val().length <= 64"
+        },
+        "presentation": {
+          ".validate": "newData.isString() && (newData.val() === 'csonet' || newData.val() === 'chuyen-de-2')"
         }
       }
     }

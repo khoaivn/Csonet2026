@@ -1,4 +1,4 @@
-import { firebaseConfig, ownerEmail } from './firebase-config.js?v=20261028-auth2';
+import { firebaseConfig, ownerEmail } from './firebase-config.js?v=20261028-decks2';
 
 // The database Rules enforce the same identity; this panel is only the UI gate.
 export async function authorizeRemote({ controller }) {

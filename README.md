@@ -1,6 +1,13 @@
-# CSONET presentation
+# Thư viện bài thuyết trình
 
-12 slides in English, written in HTML, CSS and JavaScript. No framework or build step is required. Computer Modern is loaded from a font CDN; fallback fonts are available offline. Optional Internet remote control uses Firebase Realtime Database.
+- `index.html`: trang chọn bài.
+- `NCS-csonet2026.html`: bài CSONET gốc, 12 trang.
+- `NCS-CD2.html`: Chuyên đề 2, hiện có 1 trang tiêu đề, chưa có nội dung chuyên đề.
+- `remote.html`: liên kết cố định điều khiển trên iPhone. Tự tải bài đang mở trên máy tính, dùng chung đăng nhập, vuốt, Laser/Pen và ghi chú.
+
+Đẩy tất cả file cập nhật và file mới lên GitHub Pages. **Publish lại firebase.rules.json** để cho phép trường nhận diện bài thuyết trình mới. Xem [REMOTE-SETUP.md](REMOTE-SETUP.md) để cấu hình đăng nhập riêng tư.
+
+Mở thư viện tại `https://khoaivn.github.io/Csonet2026/`. Mỗi bài vẫn mở trực tiếp bằng đường dẫn tương ứng.
 
 ## Open locally
 

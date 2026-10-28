@@ -54,3 +54,5 @@ body,button,.slide,.slide h1,.slide h2,.slide h3,.slide p,.slide span,.slide str
 
 html:has(body.preview) .toolbar,body.preview .progress{display:none!important}
 body.preview #deck{height:100dvh}
+
+.toolbar .library-link{display:inline-flex;width:36px;height:36px;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:5px;color:var(--ink)}.toolbar .library-link:hover{background:#e0eceb}.toolbar .library-link svg{width:20px;height:20px}

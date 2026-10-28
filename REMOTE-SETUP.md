@@ -47,3 +47,7 @@ Tài liệu chính thức: https://firebase.google.com/docs/auth/web/google-sign
 ## Điện thoại chờ dù trang slide đã mở
 
 Trang slide và iPhone đều phải đăng nhập tài khoản chủ sở hữu. Trên máy tính, nhấn icon điện thoại và kiểm tra trạng thái: nếu có Firebase từ chối ghi phòng, phiên chưa được tạo; kiểm tra Rules đã Publish. Nếu điện thoại báo Firebase từ chối đọc phòng, kiểm tra quyền của tài khoản và Rules. Chỉ thông báo đang chờ khi đọc được database nhưng chưa có phiên hoặc phiên hết hạn.
+
+## Nhiều bài thuyết trình
+
+Trang gốc `index.html` là thư viện chọn bài. Bài CSONET nằm tại `NCS-csonet2026.html`, Chuyên đề 2 tại `NCS-CD2.html`. Trang thư viện không tạo phiên remote; bài đang mở trên máy tính tạo phiên với mã bài để iPhone tải đúng slide và ghi chú. Cần Publish Rules mới cho trường `presentation`.
