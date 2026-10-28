@@ -8,7 +8,6 @@
  let loadedPresentation=null;
  const FIXED_ROOM='464f25357d6c0340eca766a44c6824ce';
  const controller = document.body.dataset.remote === 'controller';
- let fullscreenControl;
  let access;
  try{const {authorizeRemote}=await import('./remote-auth.js?v=20261028-toolbar10');access=await authorizeRemote({controller});}
  catch(error){$('remoteStatus').textContent=error.message;return;}
@@ -91,7 +90,7 @@
   setTool('swipe');
  }
  const status = message => { $('remoteStatus').textContent=message;if(!controller){const button=$('remoteBtn');button.title=`Điều khiển điện thoại: ${message}`;button.setAttribute('aria-label',button.title);} };
- window.addEventListener('remote-access-lost',()=>{disposed=true;connected=false;session=null;annotationPending=null;clearTimeout(timer);clearTimeout(annotationTimer);annotationStream?.close();if(controller)buttons(true);else fullscreenControl?.cancel();status('Đã ngắt kết nối: cần đăng nhập lại.');});
+ window.addEventListener('remote-access-lost',()=>{disposed=true;connected=false;session=null;annotationPending=null;clearTimeout(timer);clearTimeout(annotationTimer);annotationStream?.close();if(controller)buttons(true);status('Đã ngắt kết nối: cần đăng nhập lại.');});
  access.onTokenChanged(()=>{if(!controller&&session&&!disposed)startAnnotationStream().catch(error=>status(error.message));});
  function validateDatabase(value) {
   const url=new URL(value.trim());
@@ -110,11 +109,6 @@
   if(!state || !Number.isInteger(state.slide))return;
   $('remoteCounter').textContent=`${state.slide+1} / ${session.total}`;
   if(controller){
-   const full=$('remoteFullscreen'),pending=state.fullscreenPending===true,enabled=state.fullscreen===true;
-   full.setAttribute('aria-pressed',String(enabled));
-   full.dataset.pending=String(pending);
-   const fullLabel=pending?'Hủy yêu cầu toàn màn hình trên máy tính':enabled?'Thoát toàn màn hình trên máy tính':'Bật toàn màn hình trên máy tính';
-   full.title=fullLabel;full.setAttribute('aria-label',fullLabel);
    $('remotePrevious').disabled=busy||state.slide===0;
    $('remoteNext').disabled=busy||state.slide===session.total-1;
    preview()?.background(session.background||'#ffffff');
@@ -129,7 +123,7 @@
   }
  }
  function publishState(ack=applied) {
-  const state={slide:window.deckRemote.current(),ack,heartbeat:{'.sv':'timestamp'},...fullscreenControl?.state()};
+  const state={slide:window.deckRemote.current(),ack,heartbeat:{'.sv':'timestamp'}};
   writeQueue=writeQueue.catch(()=>{}).then(()=>request('/state','PUT',state));
   return writeQueue;
  }
@@ -142,7 +136,7 @@
     if(controller&&fixedController){connected=false;session=null;busy=false;buttons(true);status('Đang chờ máy tính mở trang slide…');timer=setTimeout(poll,1500);return;}
     throw Error('Phòng đã đóng hoặc hết hạn. Tạo phòng mới trên máy tính.');
    }
-   if(!controller&&value.sessionId!==hostSessionId){disposed=true;annotationStream?.close();session=null;fullscreenControl?.cancel();$('remoteSetup').hidden=false;$('remoteConnection').hidden=true;status('Đã chuyển quyền điều khiển sang phiên máy tính mới.');return;}
+   if(!controller&&value.sessionId!==hostSessionId){disposed=true;annotationStream?.close();session=null;$('remoteSetup').hidden=false;$('remoteConnection').hidden=true;status('Đã chuyển quyền điều khiển sang phiên máy tính mới.');return;}
    if(controller&&phoneSessionId!==(value.sessionId||'')){phoneSessionId=value.sessionId||'';lastHeartbeat=null;lastHeartbeatAt=0;heartbeatConfirmed=false;busy=false;applied='';previewSlide=-1;phoneInk.clear();gesture=null;stroke=null;laser=null;annotationPending=null;}
    if(disposed)return;
    if(!controller&&value.expiresAt-Date.now()<60000){session=value;await startHost(true);return;}
@@ -159,15 +153,13 @@
     }
     const live=heartbeatConfirmed&&performance.now()-lastHeartbeatAt<15000;connected=live;
     buttons(!live||busy);showState(value.state);
-    status(live?(busy?'Đang gửi lệnh…':value.state?.fullscreenPending?'Bấm nút xác nhận trên máy tính để bật toàn màn hình':value.state?.fullscreen?'Máy tính đang toàn màn hình':'Đã kết nối với máy tính'):(heartbeatConfirmed?'Máy tính mất kết nối. Đang chờ kết nối lại…':'Đang chờ tín hiệu từ máy tính…'));
+    status(live?(busy?'Đang chuyển slide…':'Đã kết nối với máy tính'):(heartbeatConfirmed?'Máy tính mất kết nối. Đang chờ kết nối lại…':'Đang chờ tín hiệu từ máy tính…'));
     if(!live)buttons(true);
    } else {
     if(value.command && value.command.id!==applied) {
      applied=value.command.id;
      const target=value.command.slide;
-     if(value.command.action==='fullscreen'){
-      if(typeof value.command.enabled==='boolean')await fullscreenControl.set(value.command.enabled);
-     }else if(Number.isInteger(target)&&target>=0&&target<value.total)window.deckRemote.go(target);
+     if(!value.command.action&&Number.isInteger(target)&&target>=0&&target<value.total)window.deckRemote.go(target);
     }
     await publishState();
     status('Phòng đang mở · iPhone có thể kết nối');
@@ -185,7 +177,7 @@
    localStorage.setItem('csonetDatabase',database);
    room=FIXED_ROOM;hostSessionId=crypto.randomUUID();applied='';
    const slides=window.deckRemote.total;
-   session={presentation:document.body.dataset.presentation||'csonet',sessionId:hostSessionId,total:slides,expiresAt:Date.now()+4*60*60*1000,state:{slide:window.deckRemote.current(),ack:'',heartbeat:{'.sv':'timestamp'},...fullscreenControl?.state()}};
+   session={presentation:document.body.dataset.presentation||'csonet',sessionId:hostSessionId,total:slides,expiresAt:Date.now()+4*60*60*1000,state:{slide:window.deckRemote.current(),ack:'',heartbeat:{'.sv':'timestamp'}}};
    if(previous?.background)session.background=previous.background;
    if(previous?.annotation)session.annotation=previous.annotation;
    await request('','PUT',session);
@@ -200,19 +192,11 @@
   try{await request('/command','PUT',{id:applied,slide});}
   catch(error){busy=false;status(error.message);showState(session.state);}
  }
- async function sendFullscreen(){
-  if(!connected||busy||!session)return;
-  const enabled=!(session.state?.fullscreen||session.state?.fullscreenPending);
-  busy=true;buttons(true);applied=crypto.randomUUID();status('Đang gửi lệnh toàn màn hình…');
-  try{await request('/command','PUT',{id:applied,slide:session.state.slide,action:'fullscreen',enabled});}
-  catch(error){busy=false;buttons(!connected);status(error.message);if(connected)showState(session.state);}
- }
  if(controller) {
   (async()=>{
    try{
     const params=new URLSearchParams(location.hash.slice(1));database=validateDatabase(params.get('db')||DEFAULT_DATABASE);room=params.get('room')||FIXED_ROOM;fixedController=!params.has('room');
     if(!/^[a-f0-9]{32}$/.test(room))throw Error('Liên kết không hợp lệ. Hãy mở liên kết từ máy tính.');
-    $('remoteFullscreen').onclick=sendFullscreen;
     $('remotePrevious').onclick=()=>sendSlide(session.state.slide-1);
     $('remoteNext').onclick=()=>sendSlide(session.state.slide+1);
     $('remoteSlide').onchange=event=>sendSlide(Number(event.target.value));
@@ -234,15 +218,13 @@
    }catch(error){status(error.message);}
   })();
  } else {
-  const {createRemoteFullscreen}=await import('./remote-fullscreen.mjs?v=20261028-fullscreen19');
-  fullscreenControl=createRemoteFullscreen(document,()=>{if(session&&!disposed)publishState().catch(error=>status(error.message));});
   $('remoteBtn').onclick=()=>{$('remoteDialog').showModal();};
   $('remoteClose').onclick=()=>$('remoteDialog').close();
   $('databaseUrl').value=localStorage.getItem('csonetDatabase')||DEFAULT_DATABASE;
   $('remoteStart').onclick=()=>startHost();
   $('remoteCopy').onclick=async()=>{try{await navigator.clipboard.writeText($('remoteLink').value);status('Đã sao chép liên kết. Gửi và mở bằng Safari trên iPhone.');}catch{$('remoteLink').select();status('Hãy sao chép liên kết trong ô phía trên.');}};
   $('remoteStop').onclick=async()=>{
-   disposed=true;fullscreenControl?.cancel();annotationStream?.close();clearTimeout(timer);await writeQueue.catch(()=>{});
+   disposed=true;annotationStream?.close();clearTimeout(timer);await writeQueue.catch(()=>{});
    try{const active=await request();if(active?.sessionId===hostSessionId)await request('','DELETE');status('Đã ngắt kết nối. Mở lại trang slide để tự kết nối.');}catch(error){status(error.message);}
    session=null;room='';$('remoteSetup').hidden=false;$('remoteConnection').hidden=true;
   };

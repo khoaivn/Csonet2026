@@ -26,12 +26,6 @@
           },
           "$other": {
             ".validate": false
-          },
-          "fullscreen": {
-            ".validate": "newData.isBoolean()"
-          },
-          "fullscreenPending": {
-            ".validate": "newData.isBoolean()"
           }
         },
         "command": {
@@ -44,12 +38,6 @@
           },
           "$other": {
             ".validate": false
-          },
-          "action": {
-            ".validate": "newData.val() === 'fullscreen' && newData.parent().hasChild('enabled')"
-          },
-          "enabled": {
-            ".validate": "newData.isBoolean() && newData.parent().child('action').val() === 'fullscreen'"
           }
         },
         "$other": {
