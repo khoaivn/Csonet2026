@@ -84,3 +84,11 @@ body[data-remote] .remote-page{padding-bottom:max(8px,env(safe-area-inset-bottom
 
 .remote-control-panel .remote-navigation button{width:84px;height:57px;flex-shrink:0}
 .remote-slide-pane>.remote-control-panel{min-height:57px}
+
+/* An in-page picker rotates with the remote UI, including on iOS. */
+.remote-page{position:relative}
+#remoteSlidePicker{width:110px;min-width:0;flex:0 1 110px;padding:8px;border:1px solid #d9dfdf;border-radius:8px;background:#fff;color:#142b3b;font:12px system-ui,sans-serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;touch-action:manipulation}
+#remoteSlideOptions{position:absolute;z-index:30;left:12px;bottom:76px;width:min(480px,calc(100% - 24px));max-height:calc(100% - 116px);overflow:auto;overscroll-behavior:contain;padding:6px;background:#fbfaf6;border:1px solid #d9dfdf;border-radius:10px;box-shadow:0 8px 24px #142b3b33}
+#remoteSlideOptions button{display:block;width:100%;text-align:left;padding:12px;border:0;border-radius:6px;background:transparent;color:#142b3b;font:14px/1.3 system-ui,sans-serif;touch-action:manipulation}
+#remoteSlideOptions button[aria-selected="true"]{background:#087f81;color:white}
+#remoteSlideOptions button:focus-visible{outline:2px solid #087f81;outline-offset:-2px}

@@ -27,8 +27,10 @@
   if(!response.ok)throw Error('Không tải được nội dung bài thuyết trình.');
   const parsed=new DOMParser().parseFromString(await response.text(),'text/html');
   const list=[...parsed.querySelectorAll('.slide')];if(!list.length)throw Error('Bài thuyết trình chưa có trang slide.');
-  window.remoteSlides=list;$('remoteSlide').replaceChildren();
-  list.forEach((slide,index)=>{const option=document.createElement('option');option.value=index;option.textContent=`${index+1}. ${slide.dataset.title}`;$('remoteSlide').append(option);});
+  window.remoteSlides=list;$('remoteSlide').replaceChildren();$('remoteSlideOptions').replaceChildren();
+  list.forEach((slide,index)=>{const option=document.createElement('option');option.value=index;option.textContent=`${index+1}. ${slide.dataset.title}`;$('remoteSlide').append(option);
+   const item=document.createElement('button');item.type='button';item.setAttribute('role','option');item.dataset.slide=index;item.textContent=option.textContent;
+   item.onclick=()=>{closeSlidePicker();sendSlide(index);};$('remoteSlideOptions').append(item);});
   loadedPresentation=id;previewSlide=-1;
   $('remotePreview').src=PRESENTATIONS[id].path+'?preview=1';
  }
@@ -101,6 +103,7 @@
   if(!response.ok){const denied=response.status===401||response.status===403;const action=method==='GET'?'đọc phòng':'ghi phòng';const error=Error(denied?`Firebase từ chối ${action} (HTTP ${response.status}). Kiểm tra tài khoản Google và Publish đúng firebase.rules.json mới nhất.`:`Lỗi kết nối (${response.status}).`);error.permissionDenied=denied;throw error;}
   return response.json();
  }
+ function closeSlidePicker(){if(!controller)return;$('remoteSlideOptions').hidden=true;$('remoteSlidePicker').setAttribute('aria-expanded','false');}
  function buttons(disabled) { document.querySelectorAll('[data-remote-nav]').forEach(button=>button.disabled=disabled); }
  function showState(state) {
   if(!state || !Number.isInteger(state.slide))return;
@@ -109,6 +112,8 @@
    $('remotePrevious').disabled=busy||state.slide===0;
    $('remoteNext').disabled=busy||state.slide===session.total-1;
    $('remoteSlide').value=String(state.slide);
+   $('remoteSlidePicker').textContent=($('remoteSlide').selectedOptions[0]?.textContent||'Chọn slide')+' ▾';
+   $('remoteSlideOptions').querySelectorAll('[data-slide]').forEach(item=>item.setAttribute('aria-selected',String(Number(item.dataset.slide)===state.slide)));
    if(previewSlide!==state.slide){gesture=null;stroke=null;laser=null;previewSlide=state.slide;preview()?.go(state.slide);preview()?.annotation(currentAnnotation());}
    const slide=window.remoteSlides?.[state.slide];
    $('remoteTitle').textContent=slide?.dataset.title||'';
@@ -185,6 +190,9 @@
     $('remotePrevious').onclick=()=>sendSlide(session.state.slide-1);
     $('remoteNext').onclick=()=>sendSlide(session.state.slide+1);
     $('remoteSlide').onchange=event=>sendSlide(Number(event.target.value));
+    $('remoteSlidePicker').onclick=()=>{const popup=$('remoteSlideOptions');popup.hidden=!popup.hidden;$('remoteSlidePicker').setAttribute('aria-expanded',String(!popup.hidden));if(!popup.hidden)popup.querySelector('[aria-selected="true"]')?.focus();};
+    document.addEventListener('click',event=>{if(!$('remoteSlideOptions').contains(event.target)&&!$('remoteSlidePicker').contains(event.target))closeSlidePicker();});
+    document.addEventListener('keydown',event=>{if(event.key==='Escape'){closeSlidePicker();$('remoteSlidePicker').focus();}});
     setupTools();
     $('remotePreview').addEventListener('load',()=>{if(session){preview()?.go(session.state.slide);preview()?.annotation(currentAnnotation());}});
     poll();
