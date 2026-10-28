@@ -9,7 +9,7 @@
  const FIXED_ROOM='464f25357d6c0340eca766a44c6824ce';
  const controller = document.body.dataset.remote === 'controller';
  let access;
- try{const {authorizeRemote}=await import('./remote-auth.js?v=20261028-decks3');access=await authorizeRemote({controller});}
+ try{const {authorizeRemote}=await import('./remote-auth.js?v=20261028-toolbar10');access=await authorizeRemote({controller});}
  catch(error){$('remoteStatus').textContent=error.message;return;}
  if(!controller)$('remoteInternal').hidden=false;
  let database='', room='', timer, session=null, busy=false, applied='', disposed=false;

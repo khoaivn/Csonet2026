@@ -52,7 +52,7 @@ export async function authorizeRemote({ controller }) {
  const label=document.createElement('span');label.textContent=`Đã đăng nhập: ${auth.currentUser.email}`;
  const logout=document.createElement('button');logout.type='button';logout.textContent='Đăng xuất';
  logout.onclick=async()=>{window.dispatchEvent(new Event('remote-access-lost'));await authSdk.signOut(auth);location.reload();};
- account.append(label,logout);parent.append(account);
+ if(controller){account.append(logout);document.querySelector('.remote-heading').append(account);}else{account.append(label,logout);parent.append(account);}
  return {
   async getToken(){if(!isOwner(auth.currentUser))throw Error('Cần đăng nhập tài khoản chủ sở hữu.');return auth.currentUser.getIdToken();},
   onTokenChanged(callback){return authSdk.onIdTokenChanged(auth,user=>{if(isOwner(user))callback();});}
