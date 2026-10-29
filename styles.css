@@ -49,10 +49,14 @@ html,body{width:100%;height:100%;overflow:hidden}
 @media(prefers-reduced-motion:reduce){.laser-trail{display:none}}
 @media print{.laser-trail{display:none!important}}
 
-/* Computer Modern gives the presentation its familiar LaTeX typography. */
-body,button,.slide,.slide h1,.slide h2,.slide h3,.slide p,.slide span,.slide strong,.slide b,.slide li,.slide th,.slide td,.formula,.constraints p,.constraints span,.explanation .formula,.labels span,.tokens b,.index,.key-formula>span,.quota-calculation,.big-stat,.big-stat span,.rho strong,.network-name,.conclusions li>span,.closing-bottom strong{font-family:"Computer Modern Serif","Latin Modern Roman","Times New Roman",serif}
+/* Computer Modern Sans matches the Beamer-style reference typography. */
+body,button,.slide,.slide h1,.slide h2,.slide h3,.slide p,.slide span,.slide strong,.slide b,.slide li,.slide th,.slide td,.formula,.constraints p,.constraints span,.explanation .formula,.labels span,.tokens b,.index,.key-formula>span,.quota-calculation,.big-stat,.big-stat span,.rho strong,.network-name,.conclusions li>span,.closing-bottom strong{font-family:"Computer Modern Sans","Latin Modern Sans",Arial,Helvetica,sans-serif}
 
 html:has(body.preview) .toolbar,body.preview .progress{display:none!important}
 body.preview #deck{height:100dvh}
 
 .toolbar .library-link{display:inline-flex;width:36px;height:36px;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:5px;color:var(--ink)}.toolbar .library-link:hover{background:#e0eceb}.toolbar .library-link svg{width:20px;height:20px}
+
+/* Keep mathematical expressions in a dedicated serif face. */
+.formula,.formula span,.formula strong,.formula b,.constraints p,.labels span,.tokens b,.quota-calculation,.rho strong,.conflict b{font-family:"Computer Modern Serif","Latin Modern Roman","Times New Roman",serif}
+.slide h1,.slide h2{letter-spacing:normal}
